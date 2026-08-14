@@ -1,12 +1,23 @@
-import { Text, View } from 'react-native';
+import { Redirect } from 'expo-router';
+import { ActivityIndicator, View } from 'react-native';
 
-import { t } from '@/lib/i18n';
+import { useAuth } from '@/lib/auth';
+import { colors } from '@/lib/colors';
 
+/** Session gate: routes to auth or app once the persisted session is restored. */
 export default function Index() {
-  return (
-    <View className="flex-1 items-center justify-center bg-background">
-      <Text className="text-2xl font-bold text-text">{t.app.name}</Text>
-      <Text className="mt-2 text-text-muted">{t.common.loading}</Text>
-    </View>
-  );
+  const { session, initializing } = useAuth();
+
+  if (initializing) {
+    return (
+      <View className="flex-1 items-center justify-center bg-background">
+        <ActivityIndicator color={colors.primary} />
+      </View>
+    );
+  }
+
+  if (session === null) {
+    return <Redirect href="/(auth)/sign-in" />;
+  }
+  return <Redirect href="/(app)/(tabs)/loads" />;
 }

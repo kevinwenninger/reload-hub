@@ -3,7 +3,7 @@
 @AGENTS.md
 
 ## Projektstatus
-- [ ] Phase 0 — Setup (Repo, Expo, Supabase, Grundgerüst) → `docs/SETUP_CHECKLIST.md`
+- [x] Phase 0 — Setup (Repo, Expo, Supabase, Grundgerüst) → `docs/SETUP_CHECKLIST.md`
 - [ ] Phase 1 — Foundation (Auth, Profil/Einheiten, Waffen, Komponenten + Inventar)
 - [ ] Phase 2 — Laborierungen (Loads + Versionen, Kostenrechnung)
 - [ ] Phase 3 — Range-Log (Sessions, Chrono, Offline-Write-Queue, Fotos)
