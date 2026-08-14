@@ -157,6 +157,204 @@ export type Database = {
           },
         ]
       }
+      load_versions: {
+        Row: {
+          bullet_component_id: string | null
+          bullet_lot_id: string | null
+          case_component_id: string | null
+          case_lot_id: string | null
+          cbto_input: string | null
+          cbto_mm: number | null
+          changelog: string | null
+          charge_input: string | null
+          charge_mg: number | null
+          coal_input: string | null
+          coal_mm: number | null
+          created_at: string
+          crimp: string
+          finalized_at: string | null
+          id: string
+          load_id: string
+          neck_bushing_input: string | null
+          neck_bushing_mm: number | null
+          notes: string | null
+          powder_component_id: string | null
+          powder_lot_id: string | null
+          primer_component_id: string | null
+          primer_lot_id: string | null
+          shoulder_bump_input: string | null
+          shoulder_bump_mm: number | null
+          updated_at: string
+          user_id: string
+          version_no: number
+        }
+        Insert: {
+          bullet_component_id?: string | null
+          bullet_lot_id?: string | null
+          case_component_id?: string | null
+          case_lot_id?: string | null
+          cbto_input?: string | null
+          cbto_mm?: number | null
+          changelog?: string | null
+          charge_input?: string | null
+          charge_mg?: number | null
+          coal_input?: string | null
+          coal_mm?: number | null
+          created_at?: string
+          crimp?: string
+          finalized_at?: string | null
+          id?: string
+          load_id: string
+          neck_bushing_input?: string | null
+          neck_bushing_mm?: number | null
+          notes?: string | null
+          powder_component_id?: string | null
+          powder_lot_id?: string | null
+          primer_component_id?: string | null
+          primer_lot_id?: string | null
+          shoulder_bump_input?: string | null
+          shoulder_bump_mm?: number | null
+          updated_at?: string
+          user_id: string
+          version_no: number
+        }
+        Update: {
+          bullet_component_id?: string | null
+          bullet_lot_id?: string | null
+          case_component_id?: string | null
+          case_lot_id?: string | null
+          cbto_input?: string | null
+          cbto_mm?: number | null
+          changelog?: string | null
+          charge_input?: string | null
+          charge_mg?: number | null
+          coal_input?: string | null
+          coal_mm?: number | null
+          created_at?: string
+          crimp?: string
+          finalized_at?: string | null
+          id?: string
+          load_id?: string
+          neck_bushing_input?: string | null
+          neck_bushing_mm?: number | null
+          notes?: string | null
+          powder_component_id?: string | null
+          powder_lot_id?: string | null
+          primer_component_id?: string | null
+          primer_lot_id?: string | null
+          shoulder_bump_input?: string | null
+          shoulder_bump_mm?: number | null
+          updated_at?: string
+          user_id?: string
+          version_no?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "load_versions_bullet_component_id_fkey"
+            columns: ["bullet_component_id"]
+            isOneToOne: false
+            referencedRelation: "components"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "load_versions_bullet_lot_id_fkey"
+            columns: ["bullet_lot_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_lots"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "load_versions_case_component_id_fkey"
+            columns: ["case_component_id"]
+            isOneToOne: false
+            referencedRelation: "components"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "load_versions_case_lot_id_fkey"
+            columns: ["case_lot_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_lots"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "load_versions_load_id_fkey"
+            columns: ["load_id"]
+            isOneToOne: false
+            referencedRelation: "loads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "load_versions_powder_component_id_fkey"
+            columns: ["powder_component_id"]
+            isOneToOne: false
+            referencedRelation: "components"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "load_versions_powder_lot_id_fkey"
+            columns: ["powder_lot_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_lots"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "load_versions_primer_component_id_fkey"
+            columns: ["primer_component_id"]
+            isOneToOne: false
+            referencedRelation: "components"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "load_versions_primer_lot_id_fkey"
+            columns: ["primer_lot_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_lots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      loads: {
+        Row: {
+          caliber: string
+          created_at: string
+          firearm_id: string
+          id: string
+          name: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          caliber: string
+          created_at?: string
+          firearm_id: string
+          id?: string
+          name: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          caliber?: string
+          created_at?: string
+          firearm_id?: string
+          id?: string
+          name?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loads_firearm_id_fkey"
+            columns: ["firearm_id"]
+            isOneToOne: false
+            referencedRelation: "firearms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           case_amortization_firings: number

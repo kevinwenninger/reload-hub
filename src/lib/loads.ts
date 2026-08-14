@@ -1,0 +1,76 @@
+import type { Tables, TablesInsert, TablesUpdate } from '@/lib/database.types';
+import { supabase } from '@/lib/supabase';
+
+export type Load = Tables<'loads'>;
+export type LoadVersion = Tables<'load_versions'>;
+export type LoadStatus = 'development' | 'proven' | 'retired';
+export type CrimpType = 'none' | 'roll' | 'taper';
+
+export async function listLoads(): Promise<Load[]> {
+  const { data, error } = await supabase
+    .from('loads')
+    .select('*')
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  return data;
+}
+
+export async function insertLoad(row: TablesInsert<'loads'>): Promise<void> {
+  const { error } = await supabase.from('loads').insert(row);
+  if (error) throw error;
+}
+
+export async function updateLoad(
+  id: string,
+  patch: TablesUpdate<'loads'>,
+): Promise<void> {
+  const { error } = await supabase.from('loads').update(patch).eq('id', id);
+  if (error) throw error;
+}
+
+export async function deleteLoad(id: string): Promise<void> {
+  const { error } = await supabase.from('loads').delete().eq('id', id);
+  if (error) throw error;
+}
+
+export async function listVersions(loadId: string): Promise<LoadVersion[]> {
+  const { data, error } = await supabase
+    .from('load_versions')
+    .select('*')
+    .eq('load_id', loadId)
+    .order('version_no', { ascending: false });
+  if (error) throw error;
+  return data;
+}
+
+export async function insertVersion(
+  row: TablesInsert<'load_versions'>,
+): Promise<void> {
+  const { error } = await supabase.from('load_versions').insert(row);
+  if (error) throw error;
+}
+
+export async function updateVersion(
+  id: string,
+  patch: TablesUpdate<'load_versions'>,
+): Promise<void> {
+  const { error } = await supabase
+    .from('load_versions')
+    .update(patch)
+    .eq('id', id);
+  if (error) throw error;
+}
+
+/** Finalizing makes the version immutable (DB trigger enforces it). */
+export async function finalizeVersion(id: string): Promise<void> {
+  const { error } = await supabase
+    .from('load_versions')
+    .update({ finalized_at: new Date().toISOString() })
+    .eq('id', id);
+  if (error) throw error;
+}
+
+export async function deleteVersion(id: string): Promise<void> {
+  const { error } = await supabase.from('load_versions').delete().eq('id', id);
+  if (error) throw error;
+}
