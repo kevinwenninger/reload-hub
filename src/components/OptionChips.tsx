@@ -33,7 +33,7 @@ export function OptionChips<T extends string>({
               }`}
             >
               <Text
-                className={`text-sm font-medium ${selected ? 'text-text' : 'text-text-muted'}`}
+                className={`text-sm font-medium ${selected ? 'text-on-primary' : 'text-text-muted'}`}
               >
                 {option.label}
               </Text>

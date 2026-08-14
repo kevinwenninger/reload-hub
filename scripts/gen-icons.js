@@ -7,9 +7,9 @@ const { deflateSync } = require('node:zlib');
 const { writeFileSync } = require('node:fs');
 const { join } = require('node:path');
 
-// Keep in sync with src/lib/colors.ts.
-const BG = [0x0f, 0x11, 0x15, 255];
-const ORANGE = [0xb4, 0x53, 0x09, 255];
+// Keep in sync with src/lib/colors.ts (craftsmanship palette).
+const BG = [0xf9, 0xf7, 0xf0, 255]; // Milk
+const ORANGE = [0xb1, 0x74, 0x57, 255]; // Desert Clay
 const WHITE = [255, 255, 255, 255];
 const TRANSPARENT = [0, 0, 0, 0];
 

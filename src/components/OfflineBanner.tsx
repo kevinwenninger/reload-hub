@@ -9,7 +9,7 @@ export function OfflineBanner() {
   if (isOnline) return null;
   return (
     <View className="bg-warning px-4 py-2">
-      <Text className="text-center text-sm font-medium text-background">
+      <Text className="text-center text-sm font-medium text-on-primary">
         {t.offline.banner}
       </Text>
     </View>

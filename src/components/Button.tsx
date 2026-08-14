@@ -23,6 +23,7 @@ export function Button({
   disabled = false,
   loading = false,
 }: ButtonProps) {
+  const filled = variant === 'primary' || variant === 'danger';
   return (
     <Pressable
       accessibilityRole="button"
@@ -32,9 +33,13 @@ export function Button({
       className={`min-h-12 items-center justify-center rounded-xl px-4 py-3 ${containerClasses[variant]} ${disabled ? 'opacity-50' : ''}`}
     >
       {loading ? (
-        <ActivityIndicator color={colors.text} />
+        <ActivityIndicator color={filled ? colors.onPrimary : colors.text} />
       ) : (
-        <Text className="text-base font-semibold text-text">{label}</Text>
+        <Text
+          className={`text-base font-semibold ${filled ? 'text-on-primary' : 'text-text'}`}
+        >
+          {label}
+        </Text>
       )}
     </Pressable>
   );

@@ -1,16 +1,18 @@
 // Design tokens live in src/lib/colors.ts — keep both in sync.
+// "Craftsmanship" palette: Milk / Light Stone / Desert Clay / Graphite.
 const colors = {
-  primary: '#B45309',
-  'primary-dark': '#92400E',
-  background: '#0F1115',
-  surface: '#1A1D23',
-  'surface-raised': '#232730',
-  text: '#F4F4F5',
-  'text-muted': '#9CA3AF',
-  border: '#2E333D',
-  danger: '#DC2626',
-  warning: '#D97706',
-  success: '#16A34A',
+  primary: '#B17457',
+  'primary-dark': '#96604A',
+  'on-primary': '#F9F7F0',
+  background: '#F9F7F0',
+  surface: '#F3EFE5',
+  'surface-raised': '#EAE4D6',
+  text: '#4A4947',
+  'text-muted': '#8A857B',
+  border: '#D8D2C2',
+  danger: '#A63D2A',
+  warning: '#C08A3E',
+  success: '#5F7A5A',
 };
 
 /** @type {import('tailwindcss').Config} */

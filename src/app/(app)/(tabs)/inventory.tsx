@@ -66,7 +66,7 @@ function ComponentRow({
           </Text>
           {stock.low ? (
             <View className="rounded-full bg-warning px-2 py-0.5">
-              <Text className="text-xs font-semibold text-background">
+              <Text className="text-xs font-semibold text-on-primary">
                 {t.inventory.lowStock}
               </Text>
             </View>

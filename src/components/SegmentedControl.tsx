@@ -25,7 +25,7 @@ export function SegmentedControl<T extends string>({
         >
           <Text
             className={`text-sm font-medium ${
-              option.value === value ? 'text-text' : 'text-text-muted'
+              option.value === value ? 'text-on-primary' : 'text-text-muted'
             }`}
           >
             {option.label}
