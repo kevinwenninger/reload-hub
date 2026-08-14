@@ -50,9 +50,8 @@ UUIDs dürfen clientseitig erzeugt werden (Offline-Sync, idempotente Upserts).
   - primer: `{ size }` (small_pistol/large_pistol/small_rifle/large_rifle/
     + _magnum-Varianten)
   - case: `{ caliber }`
-- ⚠️ ENTSCHEIDUNG: `attrs jsonb` (flexibel, eine Tabelle) vs. Subtyp-Tabellen
-  (strikter, mehr Joins). Empfehlung: jsonb im MVP + CHECK-Constraints via
-  Validierungs-Trigger; Migration zu Subtypen bleibt möglich.
+- Entschieden (2026-08-14): `attrs jsonb` + Validierungs-Trigger; Migration zu
+  Subtypen bleibt möglich.
 
 ### inventory_lots
 - `component_id → components`
@@ -130,9 +129,8 @@ Unveränderlich nach `finalized_at` (Update dann via RLS/Trigger geblockt;
 
 ### loaded_batches (Munitionsbestand)
 - `load_version_id`, `checklist_run_id null`, `qty int`, `qty_remaining int`
-- `date`, `notes` — Range-Sessions können hiervon abbuchen (⚠️ ENTSCHEIDUNG:
-  MVP ja/nein; günstig weil trivial, Mehrwert: "wie viel Match-Munition liegt
-  noch im Schrank")
+- `date`, `notes` — Range-Sessions können hiervon abbuchen (entschieden
+  2026-08-14: im MVP dabei)
 
 ## Beziehungs-Überblick
 ```
@@ -163,9 +161,9 @@ checklist_runs ──< loaded_batches >── load_versions
   complete_checklist_run-RPC
 Jede Migration einzeln freigeben lassen; danach DB-Typen regenerieren.
 
-## Offene Entscheidungen (mit Besitzer klären, vor Migration 001/002/004)
-1. components: jsonb-attrs vs. Subtyp-Tabellen (Empfehlung: jsonb)
-2. loaded_batches im MVP: ja/nein (Empfehlung: ja, klein)
-3. Währung: fix EUR oder pro Lot wählbar (Empfehlung: Spalte ist da, UI fix
-   EUR im MVP)
-4. Hülsen-Lifecycle pro Lot statt pro Hülse bestätigen (Empfehlung: pro Lot)
+## Entscheidungen (geklärt mit Besitzer, 2026-08-14)
+1. components: **jsonb-attrs** + Validierungs-Trigger (Migration zu Subtypen
+   bleibt möglich)
+2. loaded_batches im MVP: **ja** (klein, Migration 004)
+3. Währung: **Spalte pro Lot vorhanden, UI fix EUR** im MVP
+4. Hülsen-Lifecycle: **pro Lot** (firings_count auf inventory_lots)
