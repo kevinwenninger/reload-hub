@@ -17,9 +17,10 @@ export function UnitField({ label, unit, ...inputProps }: UnitFieldProps) {
   return (
     <View className="gap-1.5">
       <Text className="text-sm font-medium text-text-muted">{label}</Text>
-      <View className="min-h-12 flex-row items-center rounded-xl border border-border bg-surface pr-4">
+      <View className="h-12 flex-row items-center rounded-xl border border-border bg-surface pr-4">
         <TextInput
-          className="min-h-12 flex-1 px-4 py-3 text-base text-text"
+          className="h-12 flex-1 px-4 py-0 text-base text-text"
+          style={{ textAlignVertical: 'center' }}
           placeholderTextColor={colors.textMuted}
           keyboardType="decimal-pad"
           {...inputProps}

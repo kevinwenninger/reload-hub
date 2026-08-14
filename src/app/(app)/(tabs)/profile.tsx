@@ -116,7 +116,8 @@ export default function ProfileScreen() {
         <View className="gap-1.5">
           <Text className="text-sm text-text-muted">{t.profile.displayName}</Text>
           <TextInput
-            className="min-h-12 rounded-xl border border-border bg-surface-raised px-4 py-3 text-base text-text"
+            className="h-12 rounded-xl border border-border bg-surface-raised px-4 py-0 text-base text-text"
+            style={{ textAlignVertical: 'center' }}
             placeholder={t.profile.displayNamePlaceholder}
             placeholderTextColor={colors.textMuted}
             value={displayNameDraft ?? merged.display_name ?? ''}
