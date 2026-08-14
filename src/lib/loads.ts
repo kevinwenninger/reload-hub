@@ -33,6 +33,15 @@ export async function deleteLoad(id: string): Promise<void> {
   if (error) throw error;
 }
 
+export async function listAllVersions(): Promise<LoadVersion[]> {
+  const { data, error } = await supabase
+    .from('load_versions')
+    .select('*')
+    .order('version_no', { ascending: false });
+  if (error) throw error;
+  return data;
+}
+
 export async function listVersions(loadId: string): Promise<LoadVersion[]> {
   const { data, error } = await supabase
     .from('load_versions')

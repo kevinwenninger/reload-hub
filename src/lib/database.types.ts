@@ -385,6 +385,172 @@ export type Database = {
         }
         Relationships: []
       }
+      range_sessions: {
+        Row: {
+          ammo_note: string | null
+          created_at: string
+          date: string
+          distance_input: string | null
+          distance_m: number | null
+          firearm_id: string
+          group_size_input: string | null
+          group_size_mm: number | null
+          id: string
+          lessons_learned: string | null
+          load_version_id: string | null
+          location: string | null
+          photos: string[]
+          pressure_flags: string[]
+          rating: number | null
+          rounds_fired: number
+          temperature_c: number | null
+          temperature_input: string | null
+          updated_at: string
+          user_id: string
+          weather_notes: string | null
+          wind: string | null
+        }
+        Insert: {
+          ammo_note?: string | null
+          created_at?: string
+          date?: string
+          distance_input?: string | null
+          distance_m?: number | null
+          firearm_id: string
+          group_size_input?: string | null
+          group_size_mm?: number | null
+          id?: string
+          lessons_learned?: string | null
+          load_version_id?: string | null
+          location?: string | null
+          photos?: string[]
+          pressure_flags?: string[]
+          rating?: number | null
+          rounds_fired?: number
+          temperature_c?: number | null
+          temperature_input?: string | null
+          updated_at?: string
+          user_id: string
+          weather_notes?: string | null
+          wind?: string | null
+        }
+        Update: {
+          ammo_note?: string | null
+          created_at?: string
+          date?: string
+          distance_input?: string | null
+          distance_m?: number | null
+          firearm_id?: string
+          group_size_input?: string | null
+          group_size_mm?: number | null
+          id?: string
+          lessons_learned?: string | null
+          load_version_id?: string | null
+          location?: string | null
+          photos?: string[]
+          pressure_flags?: string[]
+          rating?: number | null
+          rounds_fired?: number
+          temperature_c?: number | null
+          temperature_input?: string | null
+          updated_at?: string
+          user_id?: string
+          weather_notes?: string | null
+          wind?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "range_sessions_firearm_id_fkey"
+            columns: ["firearm_id"]
+            isOneToOne: false
+            referencedRelation: "firearms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "range_sessions_load_version_id_fkey"
+            columns: ["load_version_id"]
+            isOneToOne: false
+            referencedRelation: "load_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shot_strings: {
+        Row: {
+          created_at: string
+          id: string
+          label: string | null
+          notes: string | null
+          session_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          label?: string | null
+          notes?: string | null
+          session_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          label?: string | null
+          notes?: string | null
+          session_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shot_strings_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "range_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shots: {
+        Row: {
+          created_at: string
+          id: string
+          seq: number
+          string_id: string
+          user_id: string
+          velocity_input: string | null
+          velocity_mps: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          seq: number
+          string_id: string
+          user_id: string
+          velocity_input?: string | null
+          velocity_mps: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          seq?: number
+          string_id?: string
+          user_id?: string
+          velocity_input?: string | null
+          velocity_mps?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shots_string_id_fkey"
+            columns: ["string_id"]
+            isOneToOne: false
+            referencedRelation: "shot_strings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -408,7 +574,26 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      shot_string_stats: {
+        Row: {
+          avg_mps: number | null
+          es_mps: number | null
+          max_mps: number | null
+          min_mps: number | null
+          n: number | null
+          sd_mps: number | null
+          string_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shots_string_id_fkey"
+            columns: ["string_id"]
+            isOneToOne: false
+            referencedRelation: "shot_strings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       [_ in never]: never
