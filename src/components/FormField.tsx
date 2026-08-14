@@ -21,9 +21,15 @@ export function FormField({ label, multiline, ...inputProps }: FormFieldProps) {
         className={
           multiline
             ? 'min-h-24 rounded-xl border border-border bg-surface px-4 py-3 text-base text-text'
-            : 'h-12 rounded-xl border border-border bg-surface px-4 py-0 text-base text-text'
+            : 'h-12 rounded-xl border border-border bg-surface px-4 py-0 text-text'
         }
-        style={{ textAlignVertical: multiline ? 'top' : 'center' }}
+        // Single-line: fontSize without lineHeight — an explicit lineHeight
+        // (text-base sets 24) pushes text off-center in iOS TextInputs.
+        style={
+          multiline
+            ? { textAlignVertical: 'top' }
+            : { fontSize: 16, textAlignVertical: 'center' }
+        }
         {...inputProps}
       />
     </View>

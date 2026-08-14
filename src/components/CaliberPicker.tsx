@@ -70,8 +70,8 @@ export function CaliberPicker({ label, value, onChange }: CaliberPickerProps) {
             </Pressable>
           </View>
           <TextInput
-            className="mb-3 h-12 rounded-xl border border-border bg-surface px-4 py-0 text-base text-text"
-            style={{ textAlignVertical: 'center' }}
+            className="mb-3 h-12 rounded-xl border border-border bg-surface px-4 py-0 text-text"
+            style={{ fontSize: 16, textAlignVertical: 'center' }}
             placeholder={t.common.search}
             placeholderTextColor={colors.textMuted}
             value={query}
