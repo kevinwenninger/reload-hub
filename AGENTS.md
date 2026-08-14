@@ -1,7 +1,10 @@
-# Projekt: On-Target
+# Projekt: On-Target (Arbeitstitel: **Reload Hub**)
 
-<!-- Blueprint auf Basis des bewährten Jachtacademie-Stacks (Stand 2026-07).
-     Mobile-first; Website/Webplattform folgt später. -->
+App-Name in UI/Stores ist vorläufig „Reload Hub" (`t.app.name`, `app.json`);
+die Docs verwenden weiterhin den Spec-Namen On-Target. Die App ist eigenständig
+— keine inhaltlichen, visuellen oder Asset-Verbindungen zu anderen Apps des
+Besitzers (eigene Icons/Splash via `scripts/gen-icons.js`, eigenes
+Supabase-Projekt). Mobile-first; Website/Webplattform folgt später.
 
 **On-Target** ist eine Companion-App für Wiederlader (Handloader): Laborierungen
 mit Versionierung, Komponenten-Inventar mit Lot-Tracking, Range-Log (offline-fähig)

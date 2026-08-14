@@ -6,7 +6,8 @@
  */
 export const t = {
   app: {
-    name: 'On-Target',
+    // Provisional working title — final name TBD before store submission.
+    name: 'Reload Hub',
   },
   common: {
     save: 'Save',

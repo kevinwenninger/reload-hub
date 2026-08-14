@@ -1,4 +1,7 @@
-# On-Target
+# Reload Hub
+
+> Working title — previously specced as "On-Target"; the project docs in
+> `docs/` still use that name.
 
 Companion app for handloaders: load development with versioning, component
 inventory with lot tracking, an offline-capable range log, and customizable
