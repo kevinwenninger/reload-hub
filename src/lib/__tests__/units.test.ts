@@ -14,6 +14,7 @@ import {
   mmToLength,
   mpsToVelocity,
   mToDistance,
+  parseDecimal,
   temperatureToC,
   velocityToMps,
 } from '../units';
@@ -61,6 +62,15 @@ describe('units', () => {
   it('formats via canonical values', () => {
     expect(formatMass(massToMg(42.5, 'gr'), 'gr')).toBe('42.5 gr');
     expect(formatVelocity(304.8, 'fps')).toBe('1000 fps');
+  });
+
+  it('parses decimals with comma or dot', () => {
+    expect(parseDecimal('42,5')).toBe(42.5);
+    expect(parseDecimal('42.5')).toBe(42.5);
+    expect(parseDecimal(' 168 ')).toBe(168);
+    expect(parseDecimal('')).toBeNull();
+    expect(parseDecimal('abc')).toBeNull();
+    expect(parseDecimal('1.2.3')).toBeNull();
   });
 
   it('builds raw input strings', () => {

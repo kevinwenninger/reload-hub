@@ -174,6 +174,17 @@ export function formatTemperature(
 }
 
 /**
+ * Parses user-typed decimal input; accepts both comma and dot separators
+ * ("42,5" and "42.5"). Returns null for empty/invalid input.
+ */
+export function parseDecimal(raw: string): number | null {
+  const normalized = raw.trim().replace(',', '.');
+  if (normalized === '') return null;
+  const value = Number(normalized);
+  return Number.isFinite(value) ? value : null;
+}
+
+/**
  * Builds the raw-input sister value stored next to every canonical column,
  * e.g. makeInput(42.5, 'gr') → "42.5 gr".
  */
