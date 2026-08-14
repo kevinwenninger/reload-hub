@@ -124,7 +124,7 @@ export const t = {
     typeCasePlural: 'Cases',
     all: 'All',
     manufacturer: 'Manufacturer',
-    manufacturerPlaceholder: 'e.g. Sierra, Vihtavuori',
+    manufacturerPlaceholder: 'Select manufacturer',
     name: 'Name',
     namePlaceholder: 'e.g. MatchKing 168 gr HPBT',
     mpn: 'Manufacturer part number (optional)',

@@ -6,6 +6,7 @@ import { CaliberPicker } from '@/components/CaliberPicker';
 import { FormField } from '@/components/FormField';
 import { OptionChips } from '@/components/OptionChips';
 import { SegmentedControl } from '@/components/SegmentedControl';
+import { StringPicker } from '@/components/StringPicker';
 import { UnitField } from '@/components/UnitField';
 import { useAuth } from '@/lib/auth';
 import {
@@ -22,6 +23,7 @@ import {
 } from '@/lib/componentCatalog';
 import type { Json } from '@/lib/database.types';
 import { t } from '@/lib/i18n';
+import { MANUFACTURERS } from '@/lib/manufacturers';
 import {
   UNIT_PRESETS,
   lengthToMm,
@@ -78,7 +80,9 @@ export function ComponentForm({
   const [type, setType] = useState<ComponentType>(
     (initial?.type as ComponentType) ?? 'bullet',
   );
-  const [manufacturer, setManufacturer] = useState(initial?.manufacturer ?? '');
+  const [manufacturer, setManufacturer] = useState<string | null>(
+    initial?.manufacturer ?? null,
+  );
   const [name, setName] = useState(initial?.name ?? '');
   const [mpn, setMpn] = useState(initial?.mpn ?? '');
   const [caliber, setCaliber] = useState<string | null>(
@@ -111,8 +115,7 @@ export function ComponentForm({
       : type === 'primer'
         ? primerSize !== null
         : true;
-  const valid =
-    manufacturer.trim().length > 0 && name.trim().length > 0 && typeValid;
+  const valid = manufacturer !== null && name.trim().length > 0 && typeValid;
 
   function buildAttrs(): Json {
     switch (type) {
@@ -153,11 +156,12 @@ export function ComponentForm({
           <SegmentedControl options={TYPE_OPTIONS} value={type} onChange={setType} />
         </View>
       ) : null}
-      <FormField
+      <StringPicker
         label={t.catalog.manufacturer}
         placeholder={t.catalog.manufacturerPlaceholder}
+        options={MANUFACTURERS[type]}
         value={manufacturer}
-        onChangeText={setManufacturer}
+        onChange={setManufacturer}
       />
       <FormField
         label={t.catalog.name}
@@ -238,7 +242,7 @@ export function ComponentForm({
         onPress={() =>
           onSubmit({
             type,
-            manufacturer: manufacturer.trim(),
+            manufacturer: manufacturer!,
             name: name.trim(),
             mpn: mpn.trim() === '' ? null : mpn.trim(),
             attrs: buildAttrs(),
