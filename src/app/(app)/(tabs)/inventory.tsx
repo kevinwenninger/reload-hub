@@ -137,7 +137,13 @@ export default function InventoryScreen() {
       )}
       <Button
         label={t.catalog.add}
-        onPress={() => router.push('/(app)/catalog/new')}
+        onPress={() =>
+          router.push(
+            filter === 'all'
+              ? '/(app)/catalog/new'
+              : { pathname: '/(app)/catalog/new', params: { type: filter } },
+          )
+        }
       />
     </View>
   );

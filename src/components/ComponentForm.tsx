@@ -45,6 +45,8 @@ export interface ComponentFormValues {
 
 interface ComponentFormProps {
   initial?: CatalogComponent;
+  /** Preselected type for new components (e.g. from the inventory filter). */
+  initialType?: ComponentType;
   submitLabel: string;
   submitting: boolean;
   onSubmit: (values: ComponentFormValues) => void;
@@ -63,6 +65,7 @@ function prefill(value: number | undefined, decimals: number): string {
 
 export function ComponentForm({
   initial,
+  initialType,
   submitLabel,
   submitting,
   onSubmit,
@@ -78,7 +81,7 @@ export function ComponentForm({
     CaseAttrs;
 
   const [type, setType] = useState<ComponentType>(
-    (initial?.type as ComponentType) ?? 'bullet',
+    (initial?.type as ComponentType) ?? initialType ?? 'bullet',
   );
   const [manufacturer, setManufacturer] = useState<string | null>(
     initial?.manufacturer ?? null,
