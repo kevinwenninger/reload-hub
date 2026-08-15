@@ -42,6 +42,26 @@ export async function listAllVersions(): Promise<LoadVersion[]> {
   return data;
 }
 
+/** Versions referencing a component in any of the four component slots. */
+export async function listVersionsUsingComponent(
+  componentId: string,
+): Promise<LoadVersion[]> {
+  const { data, error } = await supabase
+    .from('load_versions')
+    .select('*')
+    .or(
+      [
+        `bullet_component_id.eq.${componentId}`,
+        `powder_component_id.eq.${componentId}`,
+        `primer_component_id.eq.${componentId}`,
+        `case_component_id.eq.${componentId}`,
+      ].join(','),
+    )
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  return data;
+}
+
 export async function listVersions(loadId: string): Promise<LoadVersion[]> {
   const { data, error } = await supabase
     .from('load_versions')

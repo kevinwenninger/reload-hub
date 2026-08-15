@@ -1,27 +1,23 @@
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Link, router, useFocusEffect, useLocalSearchParams } from 'expo-router';
-import { useCallback, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, Text, View } from 'react-native';
+import { useCallback } from 'react';
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 
 import { Button } from '@/components/Button';
-import {
-  ComponentForm,
-  type ComponentFormValues,
-} from '@/components/ComponentForm';
 import { ErrorState } from '@/components/ErrorState';
 import { colors } from '@/lib/colors';
 import {
-  deleteComponent,
-  updateComponent,
+  componentDetailRows,
   type CatalogComponent,
   type ComponentType,
 } from '@/lib/componentCatalog';
-import { showErrorAlert } from '@/lib/errors';
 import { t } from '@/lib/i18n';
 import {
   listLotsForComponent,
   lotUnitForType,
   type InventoryLot,
 } from '@/lib/inventory';
+import { listLoads, listVersionsUsingComponent, type Load } from '@/lib/loads';
 import { supabase } from '@/lib/supabase';
 import { useCachedQuery } from '@/lib/useCachedQuery';
 import { useIsOnline } from '@/lib/useIsOnline';
@@ -31,7 +27,7 @@ function LotRow({ lot, unitLabel }: { lot: InventoryLot; unitLabel: string }) {
     <Link href={`/(app)/catalog/${lot.component_id}/lots/${lot.id}`} asChild>
       <Pressable
         accessibilityRole="button"
-        className={`flex-row items-center justify-between rounded-xl border border-border bg-surface-raised p-3 active:opacity-70 ${lot.archived ? 'opacity-50' : ''}`}
+        className={`flex-row items-center justify-between rounded-xl border border-border bg-surface p-4 active:opacity-70 ${lot.archived ? 'opacity-50' : ''}`}
       >
         <View className="flex-1 gap-0.5 pr-2">
           <Text className="text-sm font-medium text-text">
@@ -51,69 +47,43 @@ function LotRow({ lot, unitLabel }: { lot: InventoryLot; unitLabel: string }) {
   );
 }
 
+function SectionTitle({ children }: { children: string }) {
+  return <Text className="text-sm font-medium text-text-muted">{children}</Text>;
+}
+
 export default function ComponentDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const isOnline = useIsOnline();
-  const [submitting, setSubmitting] = useState(false);
 
-  const { data, loading, refetch } = useCachedQuery<CatalogComponent>(
-    `component:${id}`,
-    async () => {
-      const { data: row, error } = await supabase
-        .from('components')
-        .select('*')
-        .eq('id', id)
-        .single();
-      if (error) throw error;
-      return row;
-    },
+  const component = useCachedQuery<CatalogComponent>(`component:${id}`, async () => {
+    const { data: row, error } = await supabase
+      .from('components')
+      .select('*')
+      .eq('id', id)
+      .single();
+    if (error) throw error;
+    return row;
+  });
+  const lots = useCachedQuery<InventoryLot[]>(`lots:${id}`, () =>
+    listLotsForComponent(id),
   );
-
-  const { data: lots, refetch: refetchLots } = useCachedQuery<InventoryLot[]>(
-    `lots:${id}`,
-    () => listLotsForComponent(id),
+  const usages = useCachedQuery(`componentUsage:${id}`, () =>
+    listVersionsUsingComponent(id),
   );
+  const loads = useCachedQuery('loads', listLoads);
 
-  // Revalidate lots when returning from the lot screens.
+  const refetchComponent = component.refetch;
+  const refetchLots = lots.refetch;
+  const refetchUsages = usages.refetch;
   useFocusEffect(
     useCallback(() => {
+      void refetchComponent();
       void refetchLots();
-    }, [refetchLots]),
+      void refetchUsages();
+    }, [refetchComponent, refetchLots, refetchUsages]),
   );
 
-  async function handleSubmit(values: ComponentFormValues) {
-    setSubmitting(true);
-    try {
-      await updateComponent(id, values);
-      router.back();
-    } catch (e) {
-      showErrorAlert(e);
-    } finally {
-      setSubmitting(false);
-    }
-  }
-
-  function confirmDelete() {
-    Alert.alert(t.catalog.deleteTitle, t.catalog.deleteBody, [
-      { text: t.common.cancel, style: 'cancel' },
-      {
-        text: t.common.delete,
-        style: 'destructive',
-        onPress: () => {
-          void (async () => {
-            try {
-              await deleteComponent(id);
-              router.back();
-            } catch (e) {
-              showErrorAlert(e);
-            }
-          })();
-        },
-      },
-    ]);
-  }
-
-  if (loading) {
+  if (component.loading) {
     return (
       <View className="flex-1 items-center justify-center">
         <ActivityIndicator color={colors.primary} />
@@ -121,49 +91,114 @@ export default function ComponentDetail() {
     );
   }
 
-  if (data === null) {
+  if (component.data === null) {
     return (
-      <ErrorState variant={isOnline ? 'failed' : 'offline'} onRetry={refetch} />
+      <ErrorState
+        variant={isOnline ? 'failed' : 'offline'}
+        onRetry={component.refetch}
+      />
     );
   }
 
+  const data = component.data;
+  const rows = componentDetailRows(data);
   const unitLabel =
     lotUnitForType(data.type as ComponentType) === 'g'
       ? t.inventory.grams
       : t.inventory.pieces;
 
+  // Group usages by load: "Load name — v1, v3".
+  const usageByLoad = new Map<string, number[]>();
+  for (const version of usages.data ?? []) {
+    const list = usageByLoad.get(version.load_id) ?? [];
+    list.push(version.version_no);
+    usageByLoad.set(version.load_id, list);
+  }
+  const usedLoads = (loads.data ?? []).filter((load: Load) =>
+    usageByLoad.has(load.id),
+  );
+
   return (
-    <ComponentForm
-      initial={data}
-      submitLabel={t.common.save}
-      submitting={submitting}
-      onSubmit={(values) => void handleSubmit(values)}
-      footer={
-        <View className="gap-3 pt-2">
-          <Text className="text-sm font-medium text-text-muted">
-            {t.inventory.lots}
-          </Text>
-          {lots === null || lots.length === 0 ? (
-            <Text className="text-sm text-text-muted">{t.inventory.noLots}</Text>
-          ) : (
-            <View className="gap-2">
-              {lots.map((lot) => (
-                <LotRow key={lot.id} lot={lot} unitLabel={unitLabel} />
-              ))}
-            </View>
-          )}
-          <Button
-            label={t.inventory.addLot}
-            onPress={() => router.push(`/(app)/catalog/${id}/lots/new`)}
-            variant="secondary"
-          />
-          <Button
-            label={t.common.delete}
-            onPress={confirmDelete}
-            variant="danger"
-          />
+    <ScrollView contentContainerClassName="gap-6 p-6">
+      <View className="gap-1">
+        <Text className="text-2xl font-bold text-text">
+          {data.manufacturer} {data.name}
+        </Text>
+      </View>
+
+      <View className="gap-3">
+        <View className="flex-row items-center justify-between">
+          <SectionTitle>{t.catalog.details}</SectionTitle>
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => router.push(`/(app)/catalog/${id}/edit`)}
+            hitSlop={8}
+            className="min-h-10 flex-row items-center gap-1 rounded-full border border-border px-3"
+          >
+            <MaterialCommunityIcons name="pencil-outline" size={16} color={colors.text} />
+            <Text className="text-sm font-medium text-text">{t.common.edit}</Text>
+          </Pressable>
         </View>
-      }
-    />
+        <View className="gap-2 rounded-xl border border-border bg-surface p-4">
+          {rows.map((row) => (
+            <View key={row.label} className="flex-row justify-between gap-4">
+              <Text className="text-sm text-text-muted">{row.label}</Text>
+              <Text className="flex-1 text-right text-sm font-medium text-text">
+                {row.value}
+              </Text>
+            </View>
+          ))}
+        </View>
+      </View>
+
+      <View className="gap-3">
+        <SectionTitle>{t.inventory.lots}</SectionTitle>
+        {lots.data === null || lots.data.length === 0 ? (
+          <Text className="text-sm text-text-muted">{t.inventory.noLots}</Text>
+        ) : (
+          <View className="gap-2">
+            {lots.data.map((lot) => (
+              <LotRow key={lot.id} lot={lot} unitLabel={unitLabel} />
+            ))}
+          </View>
+        )}
+        <Button
+          label={t.inventory.addLot}
+          onPress={() => router.push(`/(app)/catalog/${id}/lots/new`)}
+          variant="secondary"
+        />
+      </View>
+
+      <View className="gap-3">
+        <SectionTitle>{t.catalog.usedInLoads}</SectionTitle>
+        {usedLoads.length === 0 ? (
+          <Text className="text-sm text-text-muted">{t.catalog.notUsedYet}</Text>
+        ) : (
+          <View className="gap-2">
+            {usedLoads.map((load) => {
+              const versionNos = [...(usageByLoad.get(load.id) ?? [])].sort(
+                (a, b) => a - b,
+              );
+              return (
+                <Link key={load.id} href={`/(app)/load/${load.id}`} asChild>
+                  <Pressable
+                    accessibilityRole="button"
+                    className="flex-row items-center justify-between rounded-xl border border-border bg-surface p-4 active:opacity-70"
+                  >
+                    <View className="flex-1 gap-0.5 pr-2">
+                      <Text className="text-sm font-medium text-text">{load.name}</Text>
+                      <Text className="text-xs text-text-muted">{load.caliber}</Text>
+                    </View>
+                    <Text className="text-sm text-text-muted">
+                      {versionNos.map((no) => `v${no}`).join(', ')}
+                    </Text>
+                  </Pressable>
+                </Link>
+              );
+            })}
+          </View>
+        )}
+      </View>
+    </ScrollView>
   );
 }

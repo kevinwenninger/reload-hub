@@ -70,6 +70,45 @@ export const COMPONENT_TYPE_PLURALS: Record<ComponentType, string> = {
   case: t.catalog.typeCasePlural,
 };
 
+/** Label/value rows for the component detail card (only present attrs). */
+export function componentDetailRows(
+  component: CatalogComponent,
+): { label: string; value: string }[] {
+  const attrs = component.attrs as BulletAttrs &
+    PowderAttrs &
+    PrimerAttrs &
+    CaseAttrs;
+  const rows: { label: string; value: string | undefined }[] = [
+    { label: t.catalog.type, value: COMPONENT_TYPE_LABELS[component.type as ComponentType] },
+    { label: t.catalog.mpn, value: component.mpn ?? undefined },
+  ];
+  switch (component.type as ComponentType) {
+    case 'bullet':
+      rows.push(
+        { label: t.catalog.caliber, value: attrs.caliber },
+        { label: t.catalog.bulletWeight, value: attrs.weight_input },
+        { label: t.catalog.bulletDiameter, value: attrs.diameter_input },
+        { label: t.catalog.bulletType, value: attrs.bullet_type?.toUpperCase() },
+      );
+      break;
+    case 'powder':
+      rows.push({ label: t.catalog.burnClass, value: attrs.burn_class });
+      break;
+    case 'primer':
+      rows.push({
+        label: t.catalog.primerSize,
+        value: attrs.size === undefined ? undefined : PRIMER_SIZE_LABELS[attrs.size],
+      });
+      break;
+    case 'case':
+      rows.push({ label: t.catalog.caliber, value: attrs.caliber });
+      break;
+  }
+  return rows.filter((row): row is { label: string; value: string } =>
+    Boolean(row.value),
+  );
+}
+
 /** One-line attrs summary for list rows. */
 export function componentSummary(component: CatalogComponent): string {
   const attrs = component.attrs as BulletAttrs &

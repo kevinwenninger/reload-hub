@@ -16,7 +16,8 @@ export default function CatalogLayout() {
       }}
     >
       <Stack.Screen name="new" options={{ title: t.catalog.add }} />
-      <Stack.Screen name="[id]/index" options={{ title: t.catalog.edit }} />
+      <Stack.Screen name="[id]/index" options={{ title: t.tabs.inventory }} />
+      <Stack.Screen name="[id]/edit" options={{ title: t.catalog.edit }} />
       <Stack.Screen name="[id]/lots/new" options={{ title: t.inventory.addLot }} />
       <Stack.Screen
         name="[id]/lots/[lotId]"

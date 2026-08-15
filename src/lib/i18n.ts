@@ -138,6 +138,10 @@ export const t = {
     caliber: 'Caliber',
     deleteTitle: 'Delete component?',
     deleteBody: 'This removes the component and all its inventory lots.',
+    details: 'Details',
+    usedInLoads: 'Used in loads',
+    notUsedYet: 'Not used in any load yet.',
+    versionsShort: 'versions',
   },
   loads: {
     add: 'New load',
