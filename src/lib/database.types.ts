@@ -14,6 +14,76 @@ export type Database = {
   }
   public: {
     Tables: {
+      checklist_runs: {
+        Row: {
+          batch_size: number
+          completed_at: string | null
+          created_at: string
+          id: string
+          load_version_id: string
+          loaded_batch_id: string | null
+          started_at: string
+          steps_state: Json
+          template_id: string | null
+          template_name: string
+          template_snapshot: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          batch_size: number
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          load_version_id: string
+          loaded_batch_id?: string | null
+          started_at?: string
+          steps_state?: Json
+          template_id?: string | null
+          template_name: string
+          template_snapshot: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          batch_size?: number
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          load_version_id?: string
+          loaded_batch_id?: string | null
+          started_at?: string
+          steps_state?: Json
+          template_id?: string | null
+          template_name?: string
+          template_snapshot?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "checklist_runs_load_version_id_fkey"
+            columns: ["load_version_id"]
+            isOneToOne: false
+            referencedRelation: "load_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "checklist_runs_loaded_batch_id_fkey"
+            columns: ["loaded_batch_id"]
+            isOneToOne: false
+            referencedRelation: "loaded_batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "checklist_runs_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "process_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       components: {
         Row: {
           attrs: Json
@@ -411,6 +481,47 @@ export type Database = {
           },
         ]
       }
+      process_templates: {
+        Row: {
+          created_at: string
+          description: string | null
+          forked_from: string | null
+          id: string
+          name: string
+          steps: Json
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          forked_from?: string | null
+          id?: string
+          name: string
+          steps?: Json
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          forked_from?: string | null
+          id?: string
+          name?: string
+          steps?: Json
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "process_templates_forked_from_fkey"
+            columns: ["forked_from"]
+            isOneToOne: false
+            referencedRelation: "process_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           case_amortization_firings: number
@@ -652,7 +763,10 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      complete_checklist_run: {
+        Args: { p_run_id: string }
+        Returns: string
+      }
     }
     Enums: {
       app_role: "user" | "moderator" | "admin"
