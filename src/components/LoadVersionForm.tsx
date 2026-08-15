@@ -6,7 +6,6 @@ import { ComponentSlotPicker } from '@/components/ComponentSlotPicker';
 import { FormField } from '@/components/FormField';
 import { LoadDataDisclaimer } from '@/components/LoadDataDisclaimer';
 import { SegmentedControl } from '@/components/SegmentedControl';
-import { Stepper } from '@/components/Stepper';
 import { UnitField } from '@/components/UnitField';
 import { useAuth } from '@/lib/auth';
 import type { CatalogComponent, ComponentType } from '@/lib/componentCatalog';
@@ -44,7 +43,6 @@ export interface LoadVersionFormValues {
   neck_bushing_input: string | null;
   shoulder_bump_mm: number | null;
   shoulder_bump_input: string | null;
-  rounds_loaded: number;
   changelog: string | null;
   notes: string | null;
 }
@@ -127,9 +125,6 @@ export function LoadVersionForm({
   const [shoulderBumpText, setShoulderBumpText] = useState(
     prefill(initial?.shoulder_bump_mm ?? null, (v) => mmToLength(v, prefs.length)),
   );
-  const [roundsLoaded, setRoundsLoaded] = useState(
-    isEdit ? (initial?.rounds_loaded ?? 0) : 0,
-  );
   const [changelog, setChangelog] = useState(isEdit ? (initial?.changelog ?? '') : '');
   const [notes, setNotes] = useState(initial?.notes ?? '');
 
@@ -184,7 +179,6 @@ export function LoadVersionForm({
       neck_bushing_input,
       shoulder_bump_mm,
       shoulder_bump_input,
-      rounds_loaded: roundsLoaded,
       changelog: changelog.trim() === '' ? null : changelog.trim(),
       notes: notes.trim() === '' ? null : notes.trim(),
     });
@@ -248,12 +242,6 @@ export function LoadVersionForm({
         value={shoulderBumpText}
         onChangeText={setShoulderBumpText}
       />
-      <View className="flex-row items-center justify-between">
-        <Text className="text-sm font-medium text-text-muted">
-          {t.loads.roundsLoaded}
-        </Text>
-        <Stepper value={roundsLoaded} min={0} max={99999} step={10} onChange={setRoundsLoaded} />
-      </View>
       <FormField
         label={t.loads.changelog}
         placeholder={t.loads.changelogPlaceholder}

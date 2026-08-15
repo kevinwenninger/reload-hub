@@ -1,15 +1,17 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Link, router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useCallback } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View } from 'react-native';
 
 import { Button } from '@/components/Button';
 import { ErrorState } from '@/components/ErrorState';
 import { LoadDataDisclaimer } from '@/components/LoadDataDisclaimer';
 import { useAuth } from '@/lib/auth';
+import { deleteBatch, listBatchesForVersion, type LoadedBatch } from '@/lib/batches';
 import { colors } from '@/lib/colors';
 import { listComponents } from '@/lib/componentCatalog';
 import { formatEur } from '@/lib/costs';
+import { showErrorAlert } from '@/lib/errors';
 import { t } from '@/lib/i18n';
 import { listLots } from '@/lib/inventory';
 import { type LoadVersion } from '@/lib/loads';
@@ -49,15 +51,40 @@ export default function LoadVersionDetail() {
   const sessions = useCachedQuery(`versionSessions:${versionId}`, () =>
     listSessionsForVersion(versionId),
   );
+  const batches = useCachedQuery(`versionBatches:${versionId}`, () =>
+    listBatchesForVersion(versionId),
+  );
 
   const refetchVersion = version.refetch;
   const refetchSessions = sessions.refetch;
+  const refetchBatches = batches.refetch;
   useFocusEffect(
     useCallback(() => {
       void refetchVersion();
       void refetchSessions();
-    }, [refetchVersion, refetchSessions]),
+      void refetchBatches();
+    }, [refetchVersion, refetchSessions, refetchBatches]),
   );
+
+  function confirmDeleteBatch(batch: LoadedBatch) {
+    Alert.alert(t.loads.deleteBatchTitle, t.loads.deleteBatchBody, [
+      { text: t.common.cancel, style: 'cancel' },
+      {
+        text: t.common.delete,
+        style: 'destructive',
+        onPress: () => {
+          void (async () => {
+            try {
+              await deleteBatch(batch.id);
+              await Promise.all([refetchBatches(), refetchVersion()]);
+            } catch (e) {
+              showErrorAlert(e);
+            }
+          })();
+        },
+      },
+    ]);
+  }
 
   if (version.loading || components.loading || lots.loading) {
     return (
@@ -94,9 +121,6 @@ export default function LoadVersionDetail() {
           {data.changelog ? (
             <Text className="text-sm text-text-muted">{data.changelog}</Text>
           ) : null}
-          <Text className="text-sm text-text-muted">
-            {t.loads.roundsLoaded}: {data.rounds_loaded}
-          </Text>
         </View>
         <Pressable
           accessibilityRole="button"
@@ -108,6 +132,23 @@ export default function LoadVersionDetail() {
           <Text className="text-sm font-medium text-text">{t.common.edit}</Text>
         </Pressable>
       </View>
+
+      {/* Primary CTA: log what came off the bench for this version. */}
+      <Pressable
+        accessibilityRole="button"
+        onPress={() => router.push(`/(app)/load/${id}/versions/${versionId}/batch`)}
+        className="flex-row items-center justify-between rounded-xl bg-primary px-4 py-3 active:bg-primary-dark"
+      >
+        <View className="gap-0.5">
+          <Text className="text-base font-semibold text-on-primary">
+            {t.loads.logBatch}
+          </Text>
+          <Text className="text-xs text-on-primary opacity-80">
+            {t.loads.roundsLoaded}: {data.rounds_loaded}
+          </Text>
+        </View>
+        <MaterialCommunityIcons name="plus-circle" size={28} color={colors.onPrimary} />
+      </Pressable>
 
       <View className="gap-2 rounded-xl border border-border bg-surface p-4">
         {rows.map((row) => (
@@ -144,6 +185,40 @@ export default function LoadVersionDetail() {
             </Text>
           ) : null}
         </View>
+      </View>
+
+      <View className="gap-3">
+        <SectionTitle>{t.loads.batches}</SectionTitle>
+        {batches.data === null || batches.data.length === 0 ? (
+          <Text className="text-sm text-text-muted">{t.loads.noBatches}</Text>
+        ) : (
+          <View className="gap-2">
+            {batches.data.map((batch) => (
+              <Pressable
+                key={batch.id}
+                accessibilityRole="button"
+                onLongPress={() => confirmDeleteBatch(batch)}
+                className="flex-row items-center justify-between rounded-xl border border-border bg-surface p-4"
+              >
+                <View className="flex-1 gap-0.5 pr-2">
+                  <Text className="text-sm font-medium text-text">{batch.date}</Text>
+                  <Text className="text-xs text-text-muted">
+                    {[
+                      batch.room_temperature_input,
+                      batch.humidity_pct === null ? null : `${batch.humidity_pct} %`,
+                      batch.notes,
+                    ]
+                      .filter(Boolean)
+                      .join(' · ')}
+                  </Text>
+                </View>
+                <Text className="text-sm font-semibold text-text">
+                  {batch.qty} {t.firearms.rounds}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+        )}
       </View>
 
       <View className="gap-3">

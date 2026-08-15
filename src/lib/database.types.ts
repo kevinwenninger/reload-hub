@@ -317,6 +317,59 @@ export type Database = {
           },
         ]
       }
+      loaded_batches: {
+        Row: {
+          created_at: string
+          date: string
+          humidity_pct: number | null
+          id: string
+          load_version_id: string
+          notes: string | null
+          qty: number
+          qty_remaining: number
+          room_temperature_c: number | null
+          room_temperature_input: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date?: string
+          humidity_pct?: number | null
+          id?: string
+          load_version_id: string
+          notes?: string | null
+          qty: number
+          qty_remaining: number
+          room_temperature_c?: number | null
+          room_temperature_input?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          humidity_pct?: number | null
+          id?: string
+          load_version_id?: string
+          notes?: string | null
+          qty?: number
+          qty_remaining?: number
+          room_temperature_c?: number | null
+          room_temperature_input?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loaded_batches_load_version_id_fkey"
+            columns: ["load_version_id"]
+            isOneToOne: false
+            referencedRelation: "load_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       loads: {
         Row: {
           caliber: string
