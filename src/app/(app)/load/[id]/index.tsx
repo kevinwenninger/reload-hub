@@ -1,3 +1,4 @@
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Link, router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useCallback } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View } from 'react-native';
@@ -29,7 +30,6 @@ const STATUS_OPTIONS: { value: LoadStatus; label: string }[] = [
 ];
 
 function VersionRow({ loadId, version }: { loadId: string; version: LoadVersion }) {
-  const finalized = version.finalized_at !== null;
   return (
     <Link href={`/(app)/load/${loadId}/versions/${version.id}`} asChild>
       <Pressable
@@ -47,13 +47,10 @@ function VersionRow({ loadId, version }: { loadId: string; version: LoadVersion 
             </Text>
           ) : null}
         </View>
-        <View
-          className={`rounded-full px-2.5 py-1 ${finalized ? 'bg-success' : 'bg-warning'}`}
-        >
-          <Text className="text-xs font-semibold text-on-primary">
-            {finalized ? t.loads.finalized : t.loads.draft}
-          </Text>
-        </View>
+        <Text className="text-sm text-text-muted">
+          {version.rounds_loaded} {t.firearms.rounds}
+        </Text>
+        <MaterialCommunityIcons name="chevron-right" size={20} color={colors.textMuted} />
       </Pressable>
     </Link>
   );

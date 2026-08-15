@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 
@@ -40,10 +40,22 @@ export default function NewSession() {
   const loads = useCachedQuery('loads', listLoads);
   const versions = useCachedQuery('allVersions', listAllVersions);
 
+  // "Test at the range" from a load version preselects that version.
+  const { versionId: presetVersionId } = useLocalSearchParams<{ versionId?: string }>();
+
   const [lastSetup, setLastSetup] = useState<LastSetup | null>(null);
-  const [firearmId, setFirearmId] = useState<string | null>(null);
+  const [firearmChoice, setFirearmChoice] = useState<string | null>(null);
   const [ammoKind, setAmmoKind] = useState<AmmoKind>('load');
-  const [loadVersionId, setLoadVersionId] = useState<string | null>(null);
+  const [loadVersionId, setLoadVersionId] = useState<string | null>(
+    presetVersionId ?? null,
+  );
+
+  // Until the user picks a firearm, derive it from the preset version's load
+  // (if that load is bound to one).
+  const presetVersion = versions.data?.find((v) => v.id === presetVersionId);
+  const presetLoad = loads.data?.find((l) => l.id === presetVersion?.load_id);
+  const firearmId = firearmChoice ?? presetLoad?.firearm_id ?? null;
+  const setFirearmId = setFirearmChoice;
   const [ammoNote, setAmmoNote] = useState('');
   const [distanceText, setDistanceText] = useState('100');
   const [location, setLocation] = useState('');

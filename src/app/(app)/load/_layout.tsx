@@ -22,8 +22,12 @@ export default function LoadLayout() {
         options={{ title: t.loads.newVersion }}
       />
       <Stack.Screen
-        name="[id]/versions/[versionId]"
+        name="[id]/versions/[versionId]/index"
         options={{ title: t.loads.version }}
+      />
+      <Stack.Screen
+        name="[id]/versions/[versionId]/edit"
+        options={{ title: t.loads.editVersion }}
       />
       <Stack.Screen name="[id]/compare" options={{ title: t.loads.compare }} />
     </Stack>

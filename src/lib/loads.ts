@@ -90,15 +90,6 @@ export async function updateVersion(
   if (error) throw error;
 }
 
-/** Finalizing makes the version immutable (DB trigger enforces it). */
-export async function finalizeVersion(id: string): Promise<void> {
-  const { error } = await supabase
-    .from('load_versions')
-    .update({ finalized_at: new Date().toISOString() })
-    .eq('id', id);
-  if (error) throw error;
-}
-
 export async function deleteVersion(id: string): Promise<void> {
   const { error } = await supabase.from('load_versions').delete().eq('id', id);
   if (error) throw error;

@@ -2,17 +2,14 @@ import { useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 
 import { Button } from '@/components/Button';
+import { ComponentSlotPicker } from '@/components/ComponentSlotPicker';
 import { FormField } from '@/components/FormField';
 import { LoadDataDisclaimer } from '@/components/LoadDataDisclaimer';
 import { SegmentedControl } from '@/components/SegmentedControl';
-import { SelectField, type SelectOption } from '@/components/SelectField';
+import { Stepper } from '@/components/Stepper';
 import { UnitField } from '@/components/UnitField';
 import { useAuth } from '@/lib/auth';
-import {
-  componentSummary,
-  type CatalogComponent,
-  type ComponentType,
-} from '@/lib/componentCatalog';
+import type { CatalogComponent, ComponentType } from '@/lib/componentCatalog';
 import { t } from '@/lib/i18n';
 import type { InventoryLot } from '@/lib/inventory';
 import type { CrimpType, LoadVersion } from '@/lib/loads';
@@ -47,6 +44,7 @@ export interface LoadVersionFormValues {
   neck_bushing_input: string | null;
   shoulder_bump_mm: number | null;
   shoulder_bump_input: string | null;
+  rounds_loaded: number;
   changelog: string | null;
   notes: string | null;
 }
@@ -54,6 +52,8 @@ export interface LoadVersionFormValues {
 interface LoadVersionFormProps {
   /** Prefill source: the version being edited or the latest version to copy. */
   initial?: LoadVersion;
+  /** true = editing `initial` itself; false = new version copied from it. */
+  isEdit?: boolean;
   components: CatalogComponent[];
   lots: InventoryLot[];
   submitLabel: string;
@@ -75,32 +75,6 @@ const SECTION_LABELS: Record<ComponentType, string> = {
   case: t.loads.case,
 };
 
-function componentOptions(
-  components: CatalogComponent[],
-  type: ComponentType,
-): SelectOption[] {
-  return components
-    .filter((component) => component.type === type)
-    .map((component) => ({
-      id: component.id,
-      label: `${component.manufacturer} ${component.name}`,
-      sublabel: componentSummary(component),
-    }));
-}
-
-function lotOptions(lots: InventoryLot[], componentId: string | null): SelectOption[] {
-  if (componentId === null) return [];
-  return lots
-    .filter((lot) => lot.component_id === componentId && !lot.archived)
-    .map((lot) => ({
-      id: lot.id,
-      label: lot.lot_number ?? lot.purchase_date ?? lot.id.slice(0, 8),
-      sublabel: `${lot.qty_remaining}/${lot.qty_initial} ${
-        lot.unit === 'g' ? t.inventory.grams : t.inventory.pieces
-      }`,
-    }));
-}
-
 /** Prefill helper: canonical value → editable text in the preferred unit. */
 function prefill(value: number | null, toUnit: (v: number) => number): string {
   if (value === null) return '';
@@ -109,6 +83,7 @@ function prefill(value: number | null, toUnit: (v: number) => number): string {
 
 export function LoadVersionForm({
   initial,
+  isEdit = false,
   components,
   lots,
   submitLabel,
@@ -152,13 +127,15 @@ export function LoadVersionForm({
   const [shoulderBumpText, setShoulderBumpText] = useState(
     prefill(initial?.shoulder_bump_mm ?? null, (v) => mmToLength(v, prefs.length)),
   );
-  const [changelog, setChangelog] = useState('');
+  const [roundsLoaded, setRoundsLoaded] = useState(
+    isEdit ? (initial?.rounds_loaded ?? 0) : 0,
+  );
+  const [changelog, setChangelog] = useState(isEdit ? (initial?.changelog ?? '') : '');
   const [notes, setNotes] = useState(initial?.notes ?? '');
 
-  function setComponent(type: ComponentType, id: string | null) {
-    setComponentIds({ ...componentIds, [type]: id });
-    // A different component invalidates the chosen lot.
-    setLotIds({ ...lotIds, [type]: null });
+  function setSlot(type: ComponentType, componentId: string | null, lotId: string | null) {
+    setComponentIds({ ...componentIds, [type]: componentId });
+    setLotIds({ ...lotIds, [type]: lotId });
   }
 
   function massField(text: string): [number | null, string | null] {
@@ -207,6 +184,7 @@ export function LoadVersionForm({
       neck_bushing_input,
       shoulder_bump_mm,
       shoulder_bump_input,
+      rounds_loaded: roundsLoaded,
       changelog: changelog.trim() === '' ? null : changelog.trim(),
       notes: notes.trim() === '' ? null : notes.trim(),
     });
@@ -219,27 +197,22 @@ export function LoadVersionForm({
     >
       <LoadDataDisclaimer />
 
-      {(Object.keys(SECTION_LABELS) as ComponentType[]).map((type) => (
-        <View key={type} className="gap-3 rounded-xl border border-border bg-surface p-4">
-          <SelectField
+      <View className="gap-2">
+        <Text className="text-sm font-medium text-text-muted">
+          {t.loads.components}
+        </Text>
+        {(Object.keys(SECTION_LABELS) as ComponentType[]).map((type) => (
+          <ComponentSlotPicker
+            key={type}
             label={SECTION_LABELS[type]}
-            placeholder={t.loads.componentPlaceholder}
-            options={componentOptions(components, type)}
-            value={componentIds[type]}
-            onChange={(id) => setComponent(type, id)}
-            clearable
+            components={components.filter((c) => c.type === type)}
+            lots={lots}
+            componentId={componentIds[type]}
+            lotId={lotIds[type]}
+            onChange={(componentId, lotId) => setSlot(type, componentId, lotId)}
           />
-          <SelectField
-            label={t.loads.lot}
-            placeholder={t.loads.lotPlaceholder}
-            options={lotOptions(lots, componentIds[type])}
-            value={lotIds[type]}
-            onChange={(id) => setLotIds({ ...lotIds, [type]: id })}
-            clearable
-            disabled={componentIds[type] === null}
-          />
-        </View>
-      ))}
+        ))}
+      </View>
 
       <UnitField
         label={t.loads.charge}
@@ -275,6 +248,12 @@ export function LoadVersionForm({
         value={shoulderBumpText}
         onChangeText={setShoulderBumpText}
       />
+      <View className="flex-row items-center justify-between">
+        <Text className="text-sm font-medium text-text-muted">
+          {t.loads.roundsLoaded}
+        </Text>
+        <Stepper value={roundsLoaded} min={0} max={99999} step={10} onChange={setRoundsLoaded} />
+      </View>
       <FormField
         label={t.loads.changelog}
         placeholder={t.loads.changelogPlaceholder}

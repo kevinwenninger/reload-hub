@@ -113,6 +113,19 @@ export async function listSessionsMerged(): Promise<RangeSession[]> {
   return [...localOnly, ...server];
 }
 
+/** Sessions that tested a given load version (server; used for range results). */
+export async function listSessionsForVersion(
+  loadVersionId: string,
+): Promise<RangeSession[]> {
+  const { data, error } = await supabase
+    .from('range_sessions')
+    .select('*')
+    .eq('load_version_id', loadVersionId)
+    .order('date', { ascending: false });
+  if (error) throw error;
+  return data;
+}
+
 // ------------------------------------------------------------------- strings
 
 export async function listStringsLocal(sessionId: string): Promise<ShotString[]> {

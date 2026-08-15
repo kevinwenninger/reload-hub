@@ -182,6 +182,7 @@ export type Database = {
           powder_lot_id: string | null
           primer_component_id: string | null
           primer_lot_id: string | null
+          rounds_loaded: number
           shoulder_bump_input: string | null
           shoulder_bump_mm: number | null
           updated_at: string
@@ -212,6 +213,7 @@ export type Database = {
           powder_lot_id?: string | null
           primer_component_id?: string | null
           primer_lot_id?: string | null
+          rounds_loaded?: number
           shoulder_bump_input?: string | null
           shoulder_bump_mm?: number | null
           updated_at?: string
@@ -242,6 +244,7 @@ export type Database = {
           powder_lot_id?: string | null
           primer_component_id?: string | null
           primer_lot_id?: string | null
+          rounds_loaded?: number
           shoulder_bump_input?: string | null
           shoulder_bump_mm?: number | null
           updated_at?: string
