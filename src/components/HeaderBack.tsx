@@ -18,9 +18,15 @@ export function HeaderBack() {
       accessibilityLabel={t.common.back}
       onPress={() => router.back()}
       hitSlop={12}
-      className="h-11 w-11 items-start justify-center"
+      className="h-11 w-11 items-center justify-center"
     >
-      <MaterialCommunityIcons name="chevron-left" size={30} color={colors.text} />
+      {/* Glyph sits visually right of its box centre; nudge left to balance. */}
+      <MaterialCommunityIcons
+        name="chevron-left"
+        size={28}
+        color={colors.text}
+        style={{ marginLeft: -2 }}
+      />
     </Pressable>
   );
 }
