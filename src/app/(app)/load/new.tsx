@@ -1,8 +1,9 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { ScrollView, Text } from 'react-native';
 
 import { Button } from '@/components/Button';
+import { CaliberPicker } from '@/components/CaliberPicker';
 import { FormField } from '@/components/FormField';
 import { OptionChips } from '@/components/OptionChips';
 import { SelectField } from '@/components/SelectField';
@@ -14,6 +15,12 @@ import { newId } from '@/lib/ids';
 import { insertLoad } from '@/lib/loads';
 import { useCachedQuery } from '@/lib/useCachedQuery';
 
+/**
+ * A load is defined by its cartridge (caliber required); the firearm is
+ * optional context. Picking a firearm narrows the caliber to what it shoots
+ * (.357 Magnum revolver → .357 Magnum or .38 Special — the load itself names
+ * exactly one); picking a caliber first narrows the firearm list to matches.
+ */
 export default function NewLoad() {
   const { session } = useAuth();
   const [submitting, setSubmitting] = useState(false);
@@ -24,16 +31,33 @@ export default function NewLoad() {
   const { data: firearms } = useCachedQuery('firearms', listFirearms);
 
   const firearm = firearms?.find((f) => f.id === firearmId) ?? null;
-  // Loads are firearm-bound; the caliber must be one the firearm shoots.
-  const caliberChoices =
+  const firearmCalibers =
     firearm === null ? [] : [firearm.caliber, ...firearm.secondary_calibers];
-  const effectiveCaliber =
-    caliber !== null && caliberChoices.includes(caliber)
-      ? caliber
-      : (caliberChoices[0] ?? null);
 
-  const valid =
-    name.trim().length > 0 && firearmId !== null && effectiveCaliber !== null;
+  // Firearm chosen → caliber must be one of its cartridges.
+  const effectiveCaliber =
+    firearm === null
+      ? caliber
+      : caliber !== null && firearmCalibers.includes(caliber)
+        ? caliber
+        : (firearmCalibers[0] ?? null);
+
+  // Caliber chosen (no firearm yet) → only offer firearms that shoot it.
+  const firearmOptions = (firearms ?? [])
+    .filter(
+      (f) =>
+        caliber === null ||
+        firearm !== null ||
+        f.caliber === caliber ||
+        f.secondary_calibers.includes(caliber),
+    )
+    .map((f) => ({
+      id: f.id,
+      label: f.name,
+      sublabel: [f.caliber, ...f.secondary_calibers].join(' · '),
+    }));
+
+  const valid = name.trim().length > 0 && effectiveCaliber !== null;
 
   async function handleSubmit() {
     if (!session || !valid) return;
@@ -43,7 +67,7 @@ export default function NewLoad() {
       await insertLoad({
         id,
         user_id: session.user.id,
-        firearm_id: firearmId!,
+        firearm_id: firearmId,
         caliber: effectiveCaliber!,
         name: name.trim(),
       });
@@ -66,32 +90,38 @@ export default function NewLoad() {
         value={name}
         onChangeText={setName}
       />
-      <SelectField
-        label={t.loads.firearm}
-        placeholder={t.loads.firearmPlaceholder}
-        options={(firearms ?? []).map((f) => ({
-          id: f.id,
-          label: f.name,
-          sublabel: [f.caliber, ...f.secondary_calibers].join(' · '),
-        }))}
-        value={firearmId}
-        onChange={setFirearmId}
-      />
-      {caliberChoices.length > 1 ? (
+
+      {firearm !== null && firearmCalibers.length > 1 ? (
         <OptionChips
           label={t.loads.caliber}
-          options={caliberChoices.map((value) => ({ value, label: value }))}
+          options={firearmCalibers.map((value) => ({ value, label: value }))}
           value={effectiveCaliber}
           onChange={setCaliber}
         />
-      ) : effectiveCaliber !== null ? (
-        <View className="gap-1.5">
+      ) : firearm !== null ? (
+        <>
           <Text className="text-sm font-medium text-text-muted">
             {t.loads.caliber}
           </Text>
-          <Text className="text-base text-text">{effectiveCaliber}</Text>
-        </View>
-      ) : null}
+          <Text className="-mt-3 text-base text-text">{effectiveCaliber}</Text>
+        </>
+      ) : (
+        <CaliberPicker
+          label={t.loads.caliber}
+          value={caliber}
+          onChange={setCaliber}
+        />
+      )}
+
+      <SelectField
+        label={t.loads.firearmOptional}
+        placeholder={t.loads.firearmPlaceholder}
+        options={firearmOptions}
+        value={firearmId}
+        onChange={setFirearmId}
+        clearable
+      />
+
       <Button
         label={t.common.save}
         onPress={() => void handleSubmit()}

@@ -66,7 +66,12 @@ UUIDs dürfen clientseitig erzeugt werden (Offline-Sync, idempotente Upserts).
 - `archived boolean default false` (aufgebraucht/aussortiert)
 
 ### loads
-- `firearm_id → firearms`, `caliber text`, `name text`
+- `caliber text` **Pflicht** — die Patrone definiert das Rezept und ist
+  eindeutig (eine .357-Magnum-Waffe schießt auch .38 Special, aber jede
+  Laborierung nennt genau eine Patrone)
+- `firearm_id → firearms` **optional** (Kontext; seit Migration 004 nullable) —
+  bei gesetzter Waffe muss das Kaliber eines ihrer Kaliber sein (App-Schicht)
+- `name text`
 - `status text check in ('development','proven','retired')`
 
 ### load_versions

@@ -55,8 +55,10 @@ export default function LoadsScreen() {
     );
   }
 
-  const firearmName = (id: string) =>
-    firearms.data?.find((firearm) => firearm.id === id)?.name ?? '';
+  const firearmName = (id: string | null) =>
+    id === null
+      ? ''
+      : (firearms.data?.find((firearm) => firearm.id === id)?.name ?? '');
 
   return (
     <View className="flex-1 gap-4 p-6">

@@ -57,9 +57,10 @@ export default function NewSession() {
   const firearm = firearms.data?.find((f) => f.id === firearmId) ?? null;
   const firearmCalibers =
     firearm === null ? [] : [firearm.caliber, ...firearm.secondary_calibers];
-  const eligibleLoads = (loads.data ?? []).filter(
-    (load) =>
-      load.firearm_id === firearmId || firearmCalibers.includes(load.caliber),
+  // A load is eligible if its cartridge fits the firearm (loads bound to
+  // another firearm but in a matching caliber are fine too).
+  const eligibleLoads = (loads.data ?? []).filter((load) =>
+    firearmCalibers.includes(load.caliber),
   );
   const versionOptions = (versions.data ?? [])
     .filter((version) => eligibleLoads.some((load) => load.id === version.load_id))

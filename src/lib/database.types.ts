@@ -318,7 +318,7 @@ export type Database = {
         Row: {
           caliber: string
           created_at: string
-          firearm_id: string
+          firearm_id: string | null
           id: string
           name: string
           status: string
@@ -328,7 +328,7 @@ export type Database = {
         Insert: {
           caliber: string
           created_at?: string
-          firearm_id: string
+          firearm_id?: string | null
           id?: string
           name: string
           status?: string
@@ -338,7 +338,7 @@ export type Database = {
         Update: {
           caliber?: string
           created_at?: string
-          firearm_id?: string
+          firearm_id?: string | null
           id?: string
           name?: string
           status?: string

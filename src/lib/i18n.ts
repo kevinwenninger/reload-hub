@@ -145,6 +145,7 @@ export const t = {
     name: 'Name',
     namePlaceholder: 'e.g. Match 168 project',
     firearm: 'Firearm',
+    firearmOptional: 'Firearm (optional)',
     firearmPlaceholder: 'Select firearm',
     caliber: 'Caliber',
     status: 'Status',
