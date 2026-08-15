@@ -71,9 +71,11 @@ export default function FirearmsList() {
                     {[item.caliber, ...item.secondary_calibers].join(' · ')}
                   </Text>
                 </View>
-                <Text className="text-sm text-text-muted">
-                  {item.barrel_round_count} {t.firearms.rounds}
-                </Text>
+                <MaterialCommunityIcons
+                  name="chevron-right"
+                  size={22}
+                  color={colors.textMuted}
+                />
               </Pressable>
             </Link>
           )}

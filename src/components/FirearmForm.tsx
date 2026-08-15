@@ -5,7 +5,6 @@ import { Button } from '@/components/Button';
 import { CaliberPicker } from '@/components/CaliberPicker';
 import { FormField } from '@/components/FormField';
 import { SegmentedControl } from '@/components/SegmentedControl';
-import { Stepper } from '@/components/Stepper';
 import type { Firearm, FirearmType } from '@/lib/firearms';
 import { t } from '@/lib/i18n';
 
@@ -14,7 +13,6 @@ export interface FirearmFormValues {
   type: FirearmType;
   caliber: string;
   secondary_calibers: string[];
-  barrel_round_count: number;
   notes: string | null;
 }
 
@@ -47,7 +45,6 @@ export function FirearmForm({
   const [secondary, setSecondary] = useState<string[]>(
     initial?.secondary_calibers ?? [],
   );
-  const [roundCount, setRoundCount] = useState(initial?.barrel_round_count ?? 0);
   const [notes, setNotes] = useState(initial?.notes ?? '');
 
   const valid = name.trim().length > 0 && caliber !== null;
@@ -105,17 +102,6 @@ export function FirearmForm({
           </View>
         ) : null}
       </View>
-      <View className="gap-1.5">
-        <Text className="text-sm font-medium text-text-muted">
-          {t.firearms.roundCount}
-        </Text>
-        <Stepper
-          value={roundCount}
-          min={0}
-          max={999999}
-          onChange={setRoundCount}
-        />
-      </View>
       <FormField
         label={t.firearms.notes}
         placeholder={t.firearms.notesPlaceholder}
@@ -132,7 +118,6 @@ export function FirearmForm({
             type,
             caliber: caliber!,
             secondary_calibers: secondary,
-            barrel_round_count: roundCount,
             notes: notes.trim() === '' ? null : notes.trim(),
           })
         }
