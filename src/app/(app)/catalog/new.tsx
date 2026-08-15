@@ -26,8 +26,11 @@ export default function NewComponent() {
     if (!session) return;
     setSubmitting(true);
     try {
-      await insertComponent({ id: newId(), user_id: session.user.id, ...values });
-      router.back();
+      const id = newId();
+      await insertComponent({ id, user_id: session.user.id, ...values });
+      // Nobody catalogs a component they don't own yet — go straight to the
+      // first lot; replace so "back" returns to the inventory, not the form.
+      router.replace(`/(app)/catalog/${id}/lots/new`);
     } catch (e) {
       showErrorAlert(e);
     } finally {
