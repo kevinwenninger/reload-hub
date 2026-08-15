@@ -28,6 +28,17 @@ export async function updateLoad(
   if (error) throw error;
 }
 
+/** Favorite = the sweet spot; setting one also marks the load as proven. */
+export async function setFavoriteVersion(
+  loadId: string,
+  versionId: string | null,
+): Promise<void> {
+  const patch: TablesUpdate<'loads'> = { favorite_version_id: versionId };
+  if (versionId !== null) patch.status = 'proven';
+  const { error } = await supabase.from('loads').update(patch).eq('id', loadId);
+  if (error) throw error;
+}
+
 export async function deleteLoad(id: string): Promise<void> {
   const { error } = await supabase.from('loads').delete().eq('id', id);
   if (error) throw error;

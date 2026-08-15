@@ -11,6 +11,11 @@ import { listComponents } from '@/lib/componentCatalog';
 import { formatEur } from '@/lib/costs';
 import { t } from '@/lib/i18n';
 import { listLots } from '@/lib/inventory';
+import {
+  formatRating,
+  listSessionsForVersions,
+  summarizeVersions,
+} from '@/lib/loadDevelopment';
 import { listVersions } from '@/lib/loads';
 import { costForVersion, versionRows } from '@/lib/loadVersionDisplay';
 import { useCachedQuery } from '@/lib/useCachedQuery';
@@ -24,6 +29,11 @@ export default function CompareVersions() {
   const versions = useCachedQuery(`versions:${id}`, () => listVersions(id));
   const components = useCachedQuery('components', listComponents);
   const lots = useCachedQuery('lots', listLots);
+  const versionIds = (versions.data ?? []).map((v) => v.id);
+  const sessions = useCachedQuery(
+    versionIds.length === 0 ? null : `loadSessions:${id}:${versionIds.length}`,
+    () => listSessionsForVersions(versionIds),
+  );
 
   const [leftId, setLeftId] = useState<string | null>(null);
   const [rightId, setRightId] = useState<string | null>(null);
@@ -63,6 +73,24 @@ export default function CompareVersions() {
   const amortization = profile?.case_amortization_firings ?? 10;
   const leftCost = costForVersion(left, lotList, amortization);
   const rightCost = costForVersion(right, lotList, amortization);
+  const [leftSummary, rightSummary] = summarizeVersions([left, right], sessions.data ?? []);
+  const resultRows: { label: string; left: string; right: string }[] = [
+    {
+      label: t.loads.rangeResults,
+      left: `${leftSummary.tests} ${t.loads.tests}`,
+      right: `${rightSummary.tests} ${t.loads.tests}`,
+    },
+    {
+      label: t.loads.avgRating,
+      left: leftSummary.avgRating === null ? '—' : `${formatRating(leftSummary.avgRating)} ★`,
+      right: rightSummary.avgRating === null ? '—' : `${formatRating(rightSummary.avgRating)} ★`,
+    },
+    {
+      label: t.loads.costPerRound,
+      left: formatEur(leftCost.total),
+      right: formatEur(rightCost.total),
+    },
+  ];
 
   return (
     <ScrollView contentContainerClassName="gap-5 p-6">
@@ -123,17 +151,13 @@ export default function CompareVersions() {
             </View>
           );
         })}
-        <View className="flex-row border-t border-border p-3">
-          <Text className="flex-1 pr-2 text-sm font-semibold text-text">
-            {t.loads.costPerRound}
-          </Text>
-          <Text className="flex-1 text-right text-sm font-semibold text-text">
-            {formatEur(leftCost.total)}
-          </Text>
-          <Text className="flex-1 text-right text-sm font-semibold text-text">
-            {formatEur(rightCost.total)}
-          </Text>
-        </View>
+        {resultRows.map((row) => (
+          <View key={row.label} className="flex-row border-t border-border p-3">
+            <Text className="flex-1 pr-2 text-sm font-semibold text-text">{row.label}</Text>
+            <Text className="flex-1 text-right text-sm font-semibold text-text">{row.left}</Text>
+            <Text className="flex-1 text-right text-sm font-semibold text-text">{row.right}</Text>
+          </View>
+        ))}
       </View>
     </ScrollView>
   );

@@ -444,6 +444,7 @@ export type Database = {
         Row: {
           caliber: string
           created_at: string
+          favorite_version_id: string | null
           firearm_id: string | null
           id: string
           name: string
@@ -454,6 +455,7 @@ export type Database = {
         Insert: {
           caliber: string
           created_at?: string
+          favorite_version_id?: string | null
           firearm_id?: string | null
           id?: string
           name: string
@@ -464,6 +466,7 @@ export type Database = {
         Update: {
           caliber?: string
           created_at?: string
+          favorite_version_id?: string | null
           firearm_id?: string | null
           id?: string
           name?: string
@@ -472,6 +475,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "loads_favorite_version_id_fkey"
+            columns: ["favorite_version_id"]
+            isOneToOne: false
+            referencedRelation: "load_versions"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "loads_firearm_id_fkey"
             columns: ["firearm_id"]

@@ -1,3 +1,4 @@
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Link, router, useFocusEffect } from 'expo-router';
 import { useCallback } from 'react';
 import { ActivityIndicator, FlatList, Pressable, Text, View } from 'react-native';
@@ -5,10 +6,11 @@ import { ActivityIndicator, FlatList, Pressable, Text, View } from 'react-native
 import { Button } from '@/components/Button';
 import { EmptyState } from '@/components/EmptyState';
 import { ErrorState } from '@/components/ErrorState';
+import { LoadDataDisclaimer } from '@/components/LoadDataDisclaimer';
 import { colors } from '@/lib/colors';
 import { listFirearms } from '@/lib/firearms';
 import { t } from '@/lib/i18n';
-import { listLoads, type LoadStatus } from '@/lib/loads';
+import { listAllVersions, listLoads, type LoadStatus } from '@/lib/loads';
 import { useCachedQuery } from '@/lib/useCachedQuery';
 import { useIsOnline } from '@/lib/useIsOnline';
 
@@ -28,14 +30,17 @@ export default function LoadsScreen() {
   const isOnline = useIsOnline();
   const loads = useCachedQuery('loads', listLoads);
   const firearms = useCachedQuery('firearms', listFirearms);
+  const versions = useCachedQuery('allVersions', listAllVersions);
   const refetchLoads = loads.refetch;
   const refetchFirearms = firearms.refetch;
+  const refetchVersions = versions.refetch;
 
   useFocusEffect(
     useCallback(() => {
       void refetchLoads();
       void refetchFirearms();
-    }, [refetchLoads, refetchFirearms]),
+      void refetchVersions();
+    }, [refetchLoads, refetchFirearms, refetchVersions]),
   );
 
   if (loads.loading) {
@@ -71,6 +76,10 @@ export default function LoadsScreen() {
           contentContainerClassName="gap-3"
           renderItem={({ item }) => {
             const status = item.status as LoadStatus;
+            const own = (versions.data ?? []).filter((v) => v.load_id === item.id);
+            const favorite = own.find((v) => v.id === item.favorite_version_id);
+            const latest = own[0];
+            const shown = favorite ?? latest;
             return (
               <Link href={`/(app)/load/${item.id}`} asChild>
                 <Pressable
@@ -86,6 +95,18 @@ export default function LoadsScreen() {
                         .filter(Boolean)
                         .join(' · ')}
                     </Text>
+                    {shown ? (
+                      <View className="flex-row items-center gap-1">
+                        {favorite ? (
+                          <MaterialCommunityIcons name="star" size={12} color={colors.primary} />
+                        ) : null}
+                        <Text className="text-xs text-text-muted">
+                          v{shown.version_no}
+                          {shown.charge_input ? ` · ${shown.charge_input}` : ''} ·{' '}
+                          {own.length} {t.loads.versions.toLowerCase()}
+                        </Text>
+                      </View>
+                    ) : null}
                   </View>
                   <View className={`rounded-full px-2.5 py-1 ${STATUS_CLASSES[status]}`}>
                     <Text className="text-xs font-semibold text-on-primary">
@@ -98,6 +119,9 @@ export default function LoadsScreen() {
           }}
         />
       )}
+      {loads.data.length > 0 ? (
+        <LoadDataDisclaimer />
+      ) : null}
       <Button label={t.loads.add} onPress={() => router.push('/(app)/load/new')} />
     </View>
   );

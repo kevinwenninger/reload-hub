@@ -74,16 +74,21 @@ export default function NewSession() {
   const eligibleLoads = (loads.data ?? []).filter((load) =>
     firearmCalibers.includes(load.caliber),
   );
+  // Favorites (the sweet spot) first, then everything else — "same as always"
+  // is the most common range trip.
   const versionOptions = (versions.data ?? [])
     .filter((version) => eligibleLoads.some((load) => load.id === version.load_id))
     .map((version) => {
       const load = eligibleLoads.find((entry) => entry.id === version.load_id)!;
+      const isFavorite = load.favorite_version_id === version.id;
       return {
         id: version.id,
-        label: `${load.name} v${version.version_no}`,
+        label: `${isFavorite ? '★ ' : ''}${load.name} v${version.version_no}`,
         sublabel: version.charge_input ?? undefined,
+        isFavorite,
       };
-    });
+    })
+    .sort((a, b) => Number(b.isFavorite) - Number(a.isFavorite));
 
   function applyLastSetup() {
     if (lastSetup === null) return;
@@ -175,11 +180,20 @@ export default function NewSession() {
       <SelectField
         label={t.range.firearm}
         placeholder={t.firearms.title}
-        options={(firearms.data ?? []).map((f) => ({
-          id: f.id,
-          label: f.name,
-          sublabel: [f.caliber, ...f.secondary_calibers].join(' · '),
-        }))}
+        options={(firearms.data ?? [])
+          // Preset version (from "Test at the range"): only firearms that
+          // shoot that cartridge.
+          .filter(
+            (f) =>
+              !presetLoad ||
+              f.caliber === presetLoad.caliber ||
+              f.secondary_calibers.includes(presetLoad.caliber),
+          )
+          .map((f) => ({
+            id: f.id,
+            label: f.name,
+            sublabel: [f.caliber, ...f.secondary_calibers].join(' · '),
+          }))}
         value={firearmId}
         onChange={setFirearmId}
       />

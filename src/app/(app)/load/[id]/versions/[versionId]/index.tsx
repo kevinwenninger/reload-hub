@@ -14,7 +14,8 @@ import { formatEur } from '@/lib/costs';
 import { showErrorAlert } from '@/lib/errors';
 import { t } from '@/lib/i18n';
 import { listLots } from '@/lib/inventory';
-import { type LoadVersion } from '@/lib/loads';
+import { formatRating, summarizeVersions } from '@/lib/loadDevelopment';
+import { setFavoriteVersion, type Load, type LoadVersion } from '@/lib/loads';
 import { costForVersion, versionRows } from '@/lib/loadVersionDisplay';
 import { listSessionsForVersion } from '@/lib/range';
 import { supabase } from '@/lib/supabase';
@@ -54,17 +55,35 @@ export default function LoadVersionDetail() {
   const batches = useCachedQuery(`versionBatches:${versionId}`, () =>
     listBatchesForVersion(versionId),
   );
+  const load = useCachedQuery<Load>(`load:${id}`, async () => {
+    const { data, error } = await supabase.from('loads').select('*').eq('id', id).single();
+    if (error) throw error;
+    return data;
+  });
 
   const refetchVersion = version.refetch;
   const refetchSessions = sessions.refetch;
   const refetchBatches = batches.refetch;
+  const refetchLoad = load.refetch;
   useFocusEffect(
     useCallback(() => {
       void refetchVersion();
       void refetchSessions();
       void refetchBatches();
-    }, [refetchVersion, refetchSessions, refetchBatches]),
+      void refetchLoad();
+    }, [refetchVersion, refetchSessions, refetchBatches, refetchLoad]),
   );
+
+  const isFavorite = load.data?.favorite_version_id === versionId;
+
+  async function toggleFavorite() {
+    try {
+      await setFavoriteVersion(id, isFavorite ? null : versionId);
+      await refetchLoad();
+    } catch (e) {
+      showErrorAlert(e);
+    }
+  }
 
   function confirmDeleteBatch(batch: LoadedBatch) {
     Alert.alert(t.loads.deleteBatchTitle, t.loads.deleteBatchBody, [
@@ -104,6 +123,7 @@ export default function LoadVersionDetail() {
   }
 
   const data = version.data;
+  const summary = summarizeVersions([data], sessions.data ?? [])[0];
   const rows = versionRows(data, components.data ?? [], lots.data ?? []);
   const cost = costForVersion(
     data,
@@ -117,10 +137,31 @@ export default function LoadVersionDetail() {
 
       <View className="flex-row items-start justify-between">
         <View className="flex-1 gap-0.5 pr-2">
-          <Text className="text-2xl font-bold text-text">v{data.version_no}</Text>
+          <View className="flex-row items-center gap-2">
+            {isFavorite ? (
+              <MaterialCommunityIcons name="star" size={22} color={colors.primary} />
+            ) : null}
+            <Text className="text-2xl font-bold text-text">v{data.version_no}</Text>
+          </View>
           {data.changelog ? (
             <Text className="text-sm text-text-muted">{data.changelog}</Text>
           ) : null}
+          <View className="flex-row flex-wrap gap-x-4">
+            <Text className="text-xs text-text-muted">
+              {summary.tests === 0
+                ? t.loads.notTested
+                : `${summary.tests}× ${t.loads.tested}`}
+            </Text>
+            {summary.avgRating !== null ? (
+              <View className="flex-row items-center gap-0.5">
+                <Text className="text-xs text-text-muted">{t.loads.avgRating} </Text>
+                <Text className="text-xs font-semibold text-text">
+                  {formatRating(summary.avgRating)}
+                </Text>
+                <MaterialCommunityIcons name="star" size={12} color={colors.primary} />
+              </View>
+            ) : null}
+          </View>
         </View>
         <Pressable
           accessibilityRole="button"
@@ -269,6 +310,31 @@ export default function LoadVersionDetail() {
             router.push({ pathname: '/(app)/session/new', params: { versionId } })
           }
         />
+      </View>
+
+      <View className="gap-3">
+        <Button
+          label={t.loads.nextVersion}
+          onPress={() => router.push(`/(app)/load/${id}/versions/new`)}
+          variant="secondary"
+        />
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => void toggleFavorite()}
+          className={`min-h-12 flex-row items-center justify-center gap-2 rounded-xl border px-4 py-3 ${
+            isFavorite ? 'border-primary bg-surface-raised' : 'border-border bg-surface'
+          } active:opacity-70`}
+        >
+          <MaterialCommunityIcons
+            name={isFavorite ? 'star' : 'star-outline'}
+            size={20}
+            color={colors.primary}
+          />
+          <Text className="text-base font-semibold text-text">
+            {isFavorite ? t.loads.unmarkFavorite : t.loads.markFavorite}
+          </Text>
+        </Pressable>
+        <Text className="text-center text-xs text-text-muted">{t.loads.favoriteHint}</Text>
       </View>
     </ScrollView>
   );

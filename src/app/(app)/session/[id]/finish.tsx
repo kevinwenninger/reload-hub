@@ -14,6 +14,7 @@ import {
   saveSession,
   type RangeSession,
 } from '@/lib/range';
+import { supabase } from '@/lib/supabase';
 
 const FLAG_LABELS: Record<(typeof PRESSURE_FLAGS)[number], string> = {
   heavy_bolt_lift: t.range.pressure_heavy_bolt_lift,
@@ -57,6 +58,19 @@ export default function FinishSession() {
         lessons_learned: lessons.trim() === '' ? null : lessons.trim(),
         updated_at: new Date().toISOString(),
       });
+      // Load-development loop: after rating, land on the version that was
+      // tested so the next step (fine-tune / favorite) is one tap away.
+      if (session.load_version_id !== null) {
+        const { data: version } = await supabase
+          .from('load_versions')
+          .select('load_id')
+          .eq('id', session.load_version_id)
+          .maybeSingle();
+        if (version) {
+          router.dismissTo(`/(app)/load/${version.load_id}/versions/${session.load_version_id}`);
+          return;
+        }
+      }
       router.dismissTo('/(app)/(tabs)/range');
     } catch (e) {
       showErrorAlert(e);

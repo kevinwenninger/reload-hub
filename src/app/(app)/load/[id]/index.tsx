@@ -6,11 +6,16 @@ import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View } from 'rea
 import { Button } from '@/components/Button';
 import { ErrorState } from '@/components/ErrorState';
 import { LoadDataDisclaimer } from '@/components/LoadDataDisclaimer';
-import { OptionChips } from '@/components/OptionChips';
 import { colors } from '@/lib/colors';
 import { showErrorAlert } from '@/lib/errors';
 import { listFirearms } from '@/lib/firearms';
 import { t } from '@/lib/i18n';
+import {
+  formatRating,
+  listSessionsForVersions,
+  summarizeVersions,
+  type VersionSummary,
+} from '@/lib/loadDevelopment';
 import {
   deleteLoad,
   listVersions,
@@ -23,34 +28,64 @@ import { supabase } from '@/lib/supabase';
 import { useCachedQuery } from '@/lib/useCachedQuery';
 import { useIsOnline } from '@/lib/useIsOnline';
 
-const STATUS_OPTIONS: { value: LoadStatus; label: string }[] = [
-  { value: 'development', label: t.loads.statusDevelopment },
-  { value: 'proven', label: t.loads.statusProven },
-  { value: 'retired', label: t.loads.statusRetired },
-];
+const STATUS_LABELS: Record<LoadStatus, string> = {
+  development: t.loads.statusDevelopment,
+  proven: t.loads.statusProven,
+  retired: t.loads.statusRetired,
+};
 
-function VersionRow({ loadId, version }: { loadId: string; version: LoadVersion }) {
+function VersionCard({
+  loadId,
+  summary,
+  isFavorite,
+}: {
+  loadId: string;
+  summary: VersionSummary;
+  isFavorite: boolean;
+}) {
+  const { version, tests, avgRating, lastLessons } = summary;
   return (
     <Link href={`/(app)/load/${loadId}/versions/${version.id}`} asChild>
       <Pressable
         accessibilityRole="button"
-        className="flex-row items-center gap-3 rounded-xl border border-border bg-surface p-4 active:opacity-70"
+        className={`gap-2 rounded-xl border p-4 active:opacity-70 ${
+          isFavorite ? 'border-primary bg-surface-raised' : 'border-border bg-surface'
+        }`}
       >
-        <View className="flex-1 gap-0.5">
-          <Text className="text-base font-semibold text-text">
+        <View className="flex-row items-center gap-2">
+          {isFavorite ? (
+            <MaterialCommunityIcons name="star" size={18} color={colors.primary} />
+          ) : null}
+          <Text className="flex-1 text-base font-semibold text-text">
             v{version.version_no}
             {version.charge_input ? ` — ${version.charge_input}` : ''}
           </Text>
-          {version.changelog ? (
-            <Text className="text-sm text-text-muted" numberOfLines={1}>
-              {version.changelog}
-            </Text>
+          <MaterialCommunityIcons name="chevron-right" size={20} color={colors.textMuted} />
+        </View>
+        {version.changelog ? (
+          <Text className="text-sm text-text-muted" numberOfLines={1}>
+            {version.changelog}
+          </Text>
+        ) : null}
+        <View className="flex-row flex-wrap gap-x-4 gap-y-1">
+          <Text className="text-xs text-text-muted">
+            {version.rounds_loaded} {t.loads.loaded}
+          </Text>
+          <Text className="text-xs text-text-muted">
+            {tests === 0 ? t.loads.notTested : `${tests}× ${t.loads.tested}`}
+          </Text>
+          {avgRating !== null ? (
+            <View className="flex-row items-center gap-0.5">
+              <Text className="text-xs font-semibold text-text">{formatRating(avgRating)}</Text>
+              <MaterialCommunityIcons name="star" size={12} color={colors.primary} />
+            </View>
           ) : null}
         </View>
-        <Text className="text-sm text-text-muted">
-          {version.rounds_loaded} {t.firearms.rounds}
-        </Text>
-        <MaterialCommunityIcons name="chevron-right" size={20} color={colors.textMuted} />
+        {lastLessons ? (
+          <Text className="text-xs italic text-text-muted" numberOfLines={2}>
+            {lastLessons}
+          </Text>
+        ) : null}
       </Pressable>
     </Link>
   );
@@ -61,31 +96,32 @@ export default function LoadDetail() {
   const isOnline = useIsOnline();
 
   const load = useCachedQuery<Load>(`load:${id}`, async () => {
-    const { data, error } = await supabase
-      .from('loads')
-      .select('*')
-      .eq('id', id)
-      .single();
+    const { data, error } = await supabase.from('loads').select('*').eq('id', id).single();
     if (error) throw error;
     return data;
   });
-  const versions = useCachedQuery<LoadVersion[]>(`versions:${id}`, () =>
-    listVersions(id),
+  const versions = useCachedQuery<LoadVersion[]>(`versions:${id}`, () => listVersions(id));
+  const versionIds = (versions.data ?? []).map((v) => v.id);
+  const sessions = useCachedQuery(
+    versionIds.length === 0 ? null : `loadSessions:${id}:${versionIds.length}`,
+    () => listSessionsForVersions(versionIds),
   );
   const firearms = useCachedQuery('firearms', listFirearms);
 
   const refetchLoad = load.refetch;
   const refetchVersions = versions.refetch;
+  const refetchSessions = sessions.refetch;
   useFocusEffect(
     useCallback(() => {
       void refetchLoad();
       void refetchVersions();
-    }, [refetchLoad, refetchVersions]),
+      void refetchSessions();
+    }, [refetchLoad, refetchVersions, refetchSessions]),
   );
 
-  async function setStatus(status: LoadStatus) {
+  async function retire() {
     try {
-      await updateLoad(id, { status });
+      await updateLoad(id, { status: 'retired' });
       await load.refetch();
     } catch (e) {
       showErrorAlert(e);
@@ -119,64 +155,92 @@ export default function LoadDetail() {
       </View>
     );
   }
-
   if (load.data === null) {
     return (
-      <ErrorState
-        variant={isOnline ? 'failed' : 'offline'}
-        onRetry={load.refetch}
-      />
+      <ErrorState variant={isOnline ? 'failed' : 'offline'} onRetry={load.refetch} />
     );
   }
 
+  const data = load.data;
   const firearmName =
-    firearms.data?.find((f) => f.id === load.data!.firearm_id)?.name ?? '';
-  const versionList = versions.data ?? [];
+    data.firearm_id === null
+      ? ''
+      : (firearms.data?.find((f) => f.id === data.firearm_id)?.name ?? '');
+  const summaries = summarizeVersions(versions.data ?? [], sessions.data ?? []);
+  const favorite = summaries.find((s) => s.version.id === data.favorite_version_id);
+  const others = summaries.filter((s) => s.version.id !== data.favorite_version_id);
+  const status = data.status as LoadStatus;
 
   return (
     <ScrollView contentContainerClassName="gap-5 p-6">
       <View className="gap-1">
-        <Text className="text-2xl font-bold text-text">{load.data.name}</Text>
+        <View className="flex-row items-center gap-2">
+          <Text className="flex-1 text-2xl font-bold text-text">{data.name}</Text>
+          <View
+            className={`rounded-full px-2.5 py-1 ${
+              status === 'proven'
+                ? 'bg-success'
+                : status === 'retired'
+                  ? 'bg-border'
+                  : 'bg-warning'
+            }`}
+          >
+            <Text className="text-xs font-semibold text-on-primary">{STATUS_LABELS[status]}</Text>
+          </View>
+        </View>
         <Text className="text-text-muted">
-          {[load.data.caliber, firearmName].filter(Boolean).join(' · ')}
+          {[data.caliber, firearmName].filter(Boolean).join(' · ')}
         </Text>
       </View>
 
-      <OptionChips
-        label={t.loads.status}
-        options={STATUS_OPTIONS}
-        value={load.data.status as LoadStatus}
-        onChange={(status) => void setStatus(status)}
-      />
+      {summaries.length === 0 ? (
+        <View className="gap-3 rounded-xl border border-border bg-surface p-4">
+          <Text className="text-sm text-text">{t.loads.firstVersionHint}</Text>
+          <Button
+            label={t.loads.newVersion}
+            onPress={() => router.push(`/(app)/load/${id}/versions/new`)}
+          />
+        </View>
+      ) : (
+        <>
+          <LoadDataDisclaimer />
 
-      <View className="gap-3">
-        <Text className="text-sm font-medium text-text-muted">
-          {t.loads.versions}
-        </Text>
-        {versionList.length === 0 ? (
-          <Text className="text-sm text-text-muted">{t.loads.noVersions}</Text>
-        ) : (
-          <>
-            <LoadDataDisclaimer />
+          {favorite ? (
             <View className="gap-2">
-              {versionList.map((version) => (
-                <VersionRow key={version.id} loadId={id} version={version} />
-              ))}
+              <View className="flex-row items-center gap-1.5">
+                <MaterialCommunityIcons name="star" size={16} color={colors.primary} />
+                <Text className="text-sm font-medium text-text-muted">{t.loads.favorite}</Text>
+              </View>
+              <VersionCard loadId={id} summary={favorite} isFavorite />
             </View>
-          </>
-        )}
-      </View>
+          ) : null}
 
-      <Button
-        label={t.loads.newVersion}
-        onPress={() => router.push(`/(app)/load/${id}/versions/new`)}
-      />
-      {versionList.length >= 2 ? (
-        <Button
-          label={t.loads.compare}
-          onPress={() => router.push(`/(app)/load/${id}/compare`)}
-          variant="secondary"
-        />
+          <View className="gap-2">
+            <Text className="text-sm font-medium text-text-muted">{t.loads.development}</Text>
+            {favorite ? null : (
+              <Text className="text-xs text-text-muted">{t.loads.developmentHint}</Text>
+            )}
+            {others.map((summary) => (
+              <VersionCard key={summary.version.id} loadId={id} summary={summary} isFavorite={false} />
+            ))}
+          </View>
+
+          <Button
+            label={t.loads.nextVersion}
+            onPress={() => router.push(`/(app)/load/${id}/versions/new`)}
+          />
+          {summaries.length >= 2 ? (
+            <Button
+              label={t.loads.compare}
+              onPress={() => router.push(`/(app)/load/${id}/compare`)}
+              variant="secondary"
+            />
+          ) : null}
+        </>
+      )}
+
+      {status !== 'retired' ? (
+        <Button label={t.loads.statusRetired} onPress={() => void retire()} variant="secondary" />
       ) : null}
       <Button label={t.common.delete} onPress={confirmDelete} variant="danger" />
     </ScrollView>
