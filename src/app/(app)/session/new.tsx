@@ -198,18 +198,33 @@ export default function NewSession() {
         onChange={setFirearmId}
       />
 
-      <View className="gap-1.5">
-        <Text className="text-sm font-medium text-text-muted">{t.range.ammo}</Text>
-        <SegmentedControl
-          options={[
-            { value: 'load' as AmmoKind, label: t.range.ammoLoad },
-            { value: 'factory' as AmmoKind, label: t.range.ammoFactory },
-          ]}
-          value={ammoKind}
-          onChange={setAmmoKind}
-        />
-      </View>
-      {ammoKind === 'load' ? (
+      {presetVersion ? (
+        // Came from "Test at the range": the ammunition is the version itself.
+        <View className="gap-1.5">
+          <Text className="text-sm font-medium text-text-muted">{t.range.ammo}</Text>
+          <View className="min-h-12 justify-center rounded-xl border border-border bg-surface-raised px-4 py-3">
+            <Text className="text-base font-medium text-text">
+              {presetLoad?.name ?? t.range.ammoLoad} v{presetVersion.version_no}
+            </Text>
+            {presetVersion.charge_input ? (
+              <Text className="text-xs text-text-muted">{presetVersion.charge_input}</Text>
+            ) : null}
+          </View>
+        </View>
+      ) : (
+        <View className="gap-1.5">
+          <Text className="text-sm font-medium text-text-muted">{t.range.ammo}</Text>
+          <SegmentedControl
+            options={[
+              { value: 'load' as AmmoKind, label: t.range.ammoLoad },
+              { value: 'factory' as AmmoKind, label: t.range.ammoFactory },
+            ]}
+            value={ammoKind}
+            onChange={setAmmoKind}
+          />
+        </View>
+      )}
+      {presetVersion ? null : ammoKind === 'load' ? (
         <SelectField
           label={t.range.loadVersion}
           placeholder={t.range.loadVersionPlaceholder}
