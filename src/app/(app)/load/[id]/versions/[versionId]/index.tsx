@@ -16,7 +16,7 @@ import { t } from '@/lib/i18n';
 import { listLots } from '@/lib/inventory';
 import { formatRating, summarizeVersions } from '@/lib/loadDevelopment';
 import { setFavoriteVersion, type Load, type LoadVersion } from '@/lib/loads';
-import { costForVersion, versionRows } from '@/lib/loadVersionDisplay';
+import { costForVersion, roundsPossible, versionRows } from '@/lib/loadVersionDisplay';
 import { listSessionsForVersion } from '@/lib/range';
 import { supabase } from '@/lib/supabase';
 import { useCachedQuery } from '@/lib/useCachedQuery';
@@ -125,6 +125,7 @@ export default function LoadVersionDetail() {
   const data = version.data;
   const summary = summarizeVersions([data], sessions.data ?? [])[0];
   const rows = versionRows(data, components.data ?? [], lots.data ?? []);
+  const stock = roundsPossible(data, lots.data ?? []);
   const cost = costForVersion(
     data,
     lots.data ?? [],
@@ -186,6 +187,9 @@ export default function LoadVersionDetail() {
           </Text>
           <Text className="text-xs text-on-primary opacity-80">
             {t.loads.roundsLoaded}: {data.rounds_loaded}
+            {stock !== null
+              ? ` · ${t.loads.stockAllows} ${stock.rounds} ${t.loads.moreRounds} (${t.loads.limitedBy} ${COST_PART_LABELS[stock.limiting].toLowerCase()})`
+              : ''}
           </Text>
         </View>
         <MaterialCommunityIcons name="plus-circle" size={28} color={colors.onPrimary} />

@@ -63,6 +63,36 @@ export function versionRows(
   ];
 }
 
+/**
+ * How many rounds the referenced lots still allow — the minimum across
+ * bullet/primer/case pieces and powder (charge in mg vs. grams in stock).
+ * null when no lot is referenced at all.
+ */
+export function roundsPossible(
+  version: LoadVersion,
+  lots: InventoryLot[],
+): { rounds: number; limiting: 'bullet' | 'powder' | 'primer' | 'case' } | null {
+  const lot = (id: string | null) =>
+    id === null ? undefined : lots.find((l) => l.id === id);
+  const candidates: { key: 'bullet' | 'powder' | 'primer' | 'case'; rounds: number }[] = [];
+  const bullet = lot(version.bullet_lot_id);
+  if (bullet) candidates.push({ key: 'bullet', rounds: Math.floor(bullet.qty_remaining) });
+  const primer = lot(version.primer_lot_id);
+  if (primer) candidates.push({ key: 'primer', rounds: Math.floor(primer.qty_remaining) });
+  const caseLot = lot(version.case_lot_id);
+  if (caseLot) candidates.push({ key: 'case', rounds: Math.floor(caseLot.qty_remaining) });
+  const powder = lot(version.powder_lot_id);
+  if (powder && version.charge_mg !== null && version.charge_mg > 0) {
+    candidates.push({
+      key: 'powder',
+      rounds: Math.floor((powder.qty_remaining * 1000) / version.charge_mg),
+    });
+  }
+  if (candidates.length === 0) return null;
+  const min = candidates.reduce((a, b) => (b.rounds < a.rounds ? b : a));
+  return { rounds: min.rounds, limiting: min.key };
+}
+
 export function costForVersion(
   version: LoadVersion,
   lots: InventoryLot[],
