@@ -126,6 +126,23 @@ export async function listSessionsForVersion(
   return data;
 }
 
+/** Signed URLs for a session's target photos (private bucket, 1h). */
+export async function signedPhotoUrls(paths: string[]): Promise<string[]> {
+  if (paths.length === 0) return [];
+  const { data, error } = await supabase.storage
+    .from('targets')
+    .createSignedUrls(paths, 60 * 60);
+  if (error) throw error;
+  return data
+    .map((entry) => entry.signedUrl)
+    .filter((url): url is string => typeof url === 'string' && url.length > 0);
+}
+
+/** A session counts as finished once it has been rated (R5 was completed). */
+export function isSessionFinished(session: RangeSession): boolean {
+  return session.rating !== null;
+}
+
 // ------------------------------------------------------------------- strings
 
 export async function listStringsLocal(sessionId: string): Promise<ShotString[]> {

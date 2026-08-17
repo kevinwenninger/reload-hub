@@ -4,13 +4,16 @@ import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-nati
 
 import { Button } from '@/components/Button';
 import { LoadDataDisclaimer } from '@/components/LoadDataDisclaimer';
+import { SessionSummary } from '@/components/SessionSummary';
 import { SyncBadge } from '@/components/SyncBadge';
 import { showErrorAlert } from '@/lib/errors';
+import { listFirearms } from '@/lib/firearms';
 import { t } from '@/lib/i18n';
 import { newId } from '@/lib/ids';
-import { listAllVersions } from '@/lib/loads';
+import { listAllVersions, listLoads } from '@/lib/loads';
 import {
   getSessionLocal,
+  isSessionFinished,
   listStringsLocal,
   saveSession,
   type RangeSession,
@@ -22,7 +25,11 @@ export default function SessionHub() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [session, setSession] = useState<RangeSession | null>(null);
   const [strings, setStrings] = useState<ShotString[]>([]);
+  // Finished sessions open in summary mode; "Reopen" switches back to the hub.
+  const [reopened, setReopened] = useState(false);
   const versions = useCachedQuery('allVersions', listAllVersions);
+  const loads = useCachedQuery('loads', listLoads);
+  const firearms = useCachedQuery('firearms', listFirearms);
 
   useFocusEffect(
     useCallback(() => {
@@ -41,6 +48,25 @@ export default function SessionHub() {
 
   const version =
     versions.data?.find((entry) => entry.id === session.load_version_id) ?? null;
+  const load = loads.data?.find((entry) => entry.id === version?.load_id) ?? null;
+  const firearmName =
+    firearms.data?.find((entry) => entry.id === session.firearm_id)?.name ?? '';
+
+  if (isSessionFinished(session) && !reopened) {
+    return (
+      <>
+        <Stack.Screen options={{ title: t.range.summary, headerRight: () => <SyncBadge /> }} />
+        <SessionSummary
+          session={session}
+          strings={strings}
+          firearmName={firearmName}
+          version={version}
+          load={load}
+          onReopen={() => setReopened(true)}
+        />
+      </>
+    );
+  }
 
   async function addRounds(count: number) {
     if (session === null) return;
