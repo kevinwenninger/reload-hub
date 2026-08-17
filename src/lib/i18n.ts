@@ -383,5 +383,13 @@ export const t = {
     firings: 'firings',
     firearms: 'Firearms',
     firearmsHint: 'Manage your rifles, pistols and revolvers.',
+    dangerZone: 'Account',
+    deleteAccount: 'Delete account',
+    deleteAccountTitle: 'Delete your account?',
+    deleteAccountBody:
+      'This permanently removes your account and all data — firearms, components, inventory, loads, range sessions and photos. This cannot be undone.',
+    deleteAccountConfirmTitle: 'Are you sure?',
+    deleteAccountConfirmBody: 'Last chance — everything will be gone.',
+    deleteAccountAction: 'Delete everything',
   },
 } as const;

@@ -777,6 +777,10 @@ export type Database = {
         Args: { p_run_id: string }
         Returns: string
       }
+      delete_own_account: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "user" | "moderator" | "admin"

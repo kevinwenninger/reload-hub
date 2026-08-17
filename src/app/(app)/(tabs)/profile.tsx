@@ -3,6 +3,7 @@ import { Link } from 'expo-router';
 import { useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   Pressable,
   ScrollView,
   Text,
@@ -17,7 +18,7 @@ import { useAuth, type Profile } from '@/lib/auth';
 import { colors } from '@/lib/colors';
 import { showErrorAlert } from '@/lib/errors';
 import { t } from '@/lib/i18n';
-import { updateProfile } from '@/lib/profile';
+import { deleteOwnAccount, updateProfile } from '@/lib/profile';
 import { supabase } from '@/lib/supabase';
 import {
   UNIT_LABELS,
@@ -69,6 +70,28 @@ export default function ProfileScreen() {
   async function handleSignOut() {
     const { error } = await supabase.auth.signOut();
     if (error) showErrorAlert(error);
+  }
+
+  // Two-step confirmation: irreversible, removes everything.
+  function confirmDeleteAccount() {
+    Alert.alert(t.profile.deleteAccountTitle, t.profile.deleteAccountBody, [
+      { text: t.common.cancel, style: 'cancel' },
+      {
+        text: t.common.continue,
+        style: 'destructive',
+        onPress: () =>
+          Alert.alert(t.profile.deleteAccountConfirmTitle, t.profile.deleteAccountConfirmBody, [
+            { text: t.common.cancel, style: 'cancel' },
+            {
+              text: t.profile.deleteAccountAction,
+              style: 'destructive',
+              onPress: () => {
+                void deleteOwnAccount().catch(showErrorAlert);
+              },
+            },
+          ]),
+      },
+    ]);
   }
 
   if (profileLoading) {
@@ -189,6 +212,11 @@ export default function ProfileScreen() {
       </Link>
 
       <Button label={t.auth.signOut} onPress={handleSignOut} variant="secondary" />
+      <Button
+        label={t.profile.deleteAccount}
+        onPress={confirmDeleteAccount}
+        variant="danger"
+      />
     </ScrollView>
   );
 }
