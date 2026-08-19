@@ -325,6 +325,9 @@ export const t = {
   },
   process: {
     templates: 'Templates',
+    intro: 'New to this? Start here',
+    introHide: 'Hide',
+    introShow: 'Show',
     systemTemplate: 'System template',
     myTemplates: 'My templates',
     newTemplate: 'New template',

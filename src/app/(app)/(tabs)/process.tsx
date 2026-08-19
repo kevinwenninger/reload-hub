@@ -1,10 +1,11 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Link, router, useFocusEffect } from 'expo-router';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 
 import { Button } from '@/components/Button';
 import { ErrorState } from '@/components/ErrorState';
+import { PROCESS_INTRO } from '@/content/guide/processIntro';
 import { colors } from '@/lib/colors';
 import { t } from '@/lib/i18n';
 import {
@@ -54,6 +55,8 @@ function RunRow({ run }: { run: ChecklistRun }) {
 
 export default function ProcessScreen() {
   const isOnline = useIsOnline();
+  // Beginner context: open by default until the user has their own template.
+  const [introOpen, setIntroOpen] = useState<boolean | null>(null);
   const templates = useCachedQuery('templates', listTemplates);
   const runs = useCachedQuery('runs', listRuns);
   const refetchTemplates = templates.refetch;
@@ -86,10 +89,43 @@ export default function ProcessScreen() {
   const completed = (runs.data ?? []).filter((run) => run.completed_at !== null);
   const system = templates.data.filter(isSystemTemplate);
   const mine = templates.data.filter((template) => !isSystemTemplate(template));
+  const showIntro = introOpen ?? mine.length === 0;
 
   return (
     <ScrollView contentContainerClassName="gap-6 p-6">
       <Text className="text-2xl font-bold text-text">{t.tabs.process}</Text>
+
+      <View className="rounded-xl border border-border bg-surface">
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => setIntroOpen(!showIntro)}
+          className="min-h-12 flex-row items-center justify-between px-4 py-3"
+        >
+          <View className="flex-row items-center gap-2">
+            <MaterialCommunityIcons name="school-outline" size={20} color={colors.primary} />
+            <Text className="text-base font-semibold text-text">{t.process.intro}</Text>
+          </View>
+          <Text className="text-sm text-primary">
+            {showIntro ? t.process.introHide : t.process.introShow}
+          </Text>
+        </Pressable>
+        {showIntro ? (
+          <View className="gap-4 border-t border-border px-4 pb-4 pt-3">
+            <Text className="text-base font-semibold text-text">{PROCESS_INTRO.title}</Text>
+            <Text className="text-sm leading-5 text-text">{PROCESS_INTRO.lead}</Text>
+            {PROCESS_INTRO.common.map((item) => (
+              <View key={item.title} className="gap-0.5">
+                <Text className="text-sm font-semibold text-text">{item.title}</Text>
+                <Text className="text-sm leading-5 text-text-muted">{item.body}</Text>
+              </View>
+            ))}
+            <Text className="text-sm leading-5 text-text">{PROCESS_INTRO.howTo}</Text>
+            <View className="border-l-2 border-warning pl-3">
+              <Text className="text-xs leading-4 text-text-muted">{PROCESS_INTRO.reminder}</Text>
+            </View>
+          </View>
+        ) : null}
+      </View>
 
       {active.length > 0 ? (
         <View className="gap-3">
