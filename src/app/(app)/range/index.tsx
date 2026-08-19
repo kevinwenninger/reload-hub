@@ -27,8 +27,7 @@ export default function RangeScreen() {
 
   return (
     <View className="flex-1 gap-4 p-6">
-      <View className="flex-row items-center justify-between">
-        <Text className="text-2xl font-bold text-text">{t.tabs.range}</Text>
+      <View className="flex-row items-center justify-end">
         <SyncBadge />
       </View>
       {sessions.length === 0 ? (

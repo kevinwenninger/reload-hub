@@ -71,7 +71,7 @@ export default function FinishSession() {
           return;
         }
       }
-      router.dismissTo('/(app)/(tabs)/range');
+      router.dismissTo('/(app)/(tabs)');
     } catch (e) {
       showErrorAlert(e);
     } finally {

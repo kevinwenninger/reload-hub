@@ -19,5 +19,5 @@ export default function Index() {
   if (session === null) {
     return <Redirect href="/(auth)/sign-in" />;
   }
-  return <Redirect href="/(app)/(tabs)/loads" />;
+  return <Redirect href="/(app)/(tabs)" />;
 }

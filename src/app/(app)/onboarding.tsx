@@ -39,7 +39,7 @@ export default function Onboarding() {
       return;
     }
     await refetchProfile();
-    router.replace('/(app)/(tabs)/loads');
+    router.replace('/(app)/(tabs)');
   }
 
   return (

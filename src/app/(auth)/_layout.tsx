@@ -7,7 +7,7 @@ export default function AuthLayout() {
   const { session, initializing } = useAuth();
 
   if (!initializing && session !== null) {
-    return <Redirect href="/(app)/(tabs)/loads" />;
+    return <Redirect href="/(app)/(tabs)" />;
   }
 
   return (

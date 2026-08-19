@@ -192,6 +192,25 @@ export default function ProfileScreen() {
         </View>
       </View>
 
+      <Link href="/(app)/range" asChild>
+        <Pressable
+          accessibilityRole="button"
+          className="min-h-12 flex-row items-center justify-between rounded-xl border border-border bg-surface p-4 active:opacity-70"
+        >
+          <View className="flex-1 gap-0.5 pr-2">
+            <Text className="text-base font-semibold text-text">
+              {t.profile.rangeLog}
+            </Text>
+            <Text className="text-sm text-text-muted">{t.profile.rangeLogHint}</Text>
+          </View>
+          <MaterialCommunityIcons
+            name="chevron-right"
+            size={22}
+            color={colors.textMuted}
+          />
+        </Pressable>
+      </Link>
+
       <Link href="/(app)/firearms" asChild>
         <Pressable
           accessibilityRole="button"

@@ -36,16 +36,16 @@ export default function TabsLayout() {
       }}
     >
       <Tabs.Screen
+        name="index"
+        options={{ title: t.tabs.home, tabBarIcon: tabIcon('view-dashboard-outline') }}
+      />
+      <Tabs.Screen
         name="loads"
         options={{ title: t.tabs.loads, tabBarIcon: tabIcon('bullseye-arrow') }}
       />
       <Tabs.Screen
         name="inventory"
         options={{ title: t.tabs.inventory, tabBarIcon: tabIcon('package-variant-closed') }}
-      />
-      <Tabs.Screen
-        name="range"
-        options={{ title: t.tabs.range, tabBarIcon: tabIcon('target') }}
       />
       <Tabs.Screen
         name="process"
