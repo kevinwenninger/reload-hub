@@ -27,7 +27,7 @@ function LotRow({ lot, unitLabel }: { lot: InventoryLot; unitLabel: string }) {
     <Link href={`/(app)/catalog/${lot.component_id}/lots/${lot.id}`} asChild>
       <Pressable
         accessibilityRole="button"
-        className={`flex-row items-center justify-between rounded-xl border border-border bg-surface p-4 active:opacity-70 ${lot.archived ? 'opacity-50' : ''}`}
+        className={`flex-row items-center justify-between rounded-card border border-border bg-surface p-4 active:opacity-70 ${lot.archived ? 'opacity-50' : ''}`}
       >
         <View className="flex-1 gap-0.5 pr-2">
           <Text className="text-sm font-medium text-text">
@@ -139,7 +139,7 @@ export default function ComponentDetail() {
             <Text className="text-sm font-medium text-text">{t.common.edit}</Text>
           </Pressable>
         </View>
-        <View className="gap-2 rounded-xl border border-border bg-surface p-4">
+        <View className="gap-2 rounded-card border border-border bg-surface p-4">
           {rows.map((row) => (
             <View key={row.label} className="flex-row justify-between gap-4">
               <Text className="text-sm text-text-muted">{row.label}</Text>
@@ -183,7 +183,7 @@ export default function ComponentDetail() {
                 <Link key={load.id} href={`/(app)/load/${load.id}`} asChild>
                   <Pressable
                     accessibilityRole="button"
-                    className="flex-row items-center justify-between rounded-xl border border-border bg-surface p-4 active:opacity-70"
+                    className="flex-row items-center justify-between rounded-card border border-border bg-surface p-4 active:opacity-70"
                   >
                     <View className="flex-1 gap-0.5 pr-2">
                       <Text className="text-sm font-medium text-text">{load.name}</Text>

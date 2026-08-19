@@ -53,7 +53,7 @@ function StringCard({ string, prefs }: { string: ShotString; prefs: UnitPrefs })
     mps === null ? '—' : mpsToVelocity(mps, prefs.velocity).toFixed(decimals);
 
   return (
-    <View className="gap-2 rounded-xl border border-border bg-surface p-4">
+    <View className="gap-2 rounded-card border border-border bg-surface p-4">
       <Text className="text-base font-semibold text-text">
         {string.label ?? t.range.addString}
       </Text>
@@ -139,7 +139,7 @@ export function SessionSummary({
           >
             <Pressable
               accessibilityRole="button"
-              className="flex-row items-center justify-between rounded-xl border border-border bg-surface p-4 active:opacity-70"
+              className="flex-row items-center justify-between rounded-card border border-border bg-surface p-4 active:opacity-70"
             >
               <View className="flex-1 gap-0.5 pr-2">
                 <Text className="text-base font-semibold text-text">

@@ -87,7 +87,7 @@ export default function SessionHub() {
     <>
       <Stack.Screen options={{ headerRight: () => <SyncBadge /> }} />
       <ScrollView contentContainerClassName="gap-5 p-6">
-        <View className="gap-1 rounded-xl border border-border bg-surface p-4">
+        <View className="gap-1 rounded-card border border-border bg-surface p-4">
           <Text className="text-base font-semibold text-text">
             {[session.location, session.distance_input].filter(Boolean).join(' · ')}
           </Text>
@@ -109,7 +109,7 @@ export default function SessionHub() {
                 key={count}
                 accessibilityRole="button"
                 onPress={() => void addRounds(count)}
-                className="h-14 flex-1 items-center justify-center rounded-xl border border-border bg-surface-raised active:bg-surface"
+                className="h-14 flex-1 items-center justify-center rounded-card border border-border bg-surface-raised active:bg-surface"
               >
                 <Text className="text-lg font-semibold text-text">+{count}</Text>
               </Pressable>
@@ -123,7 +123,7 @@ export default function SessionHub() {
               key={string.id}
               accessibilityRole="button"
               onPress={() => router.push(`/(app)/session/${id}/string/${string.id}`)}
-              className="min-h-12 justify-center rounded-xl border border-border bg-surface p-4 active:opacity-70"
+              className="min-h-12 justify-center rounded-card border border-border bg-surface p-4 active:opacity-70"
             >
               <Text className="text-base font-medium text-text">
                 {string.label ?? t.range.addString}

@@ -129,7 +129,7 @@ export function LotForm({
             accessibilityRole="switch"
             accessibilityState={{ checked: archived }}
             onPress={() => setArchived(!archived)}
-            className="min-h-12 flex-row items-center justify-between rounded-xl border border-border bg-surface px-4 py-3"
+            className="min-h-12 flex-row items-center justify-between rounded-card border border-border bg-surface px-4 py-3"
           >
             <View className="flex-1 gap-0.5 pr-2">
               <Text className="text-base text-text">{t.inventory.archived}</Text>

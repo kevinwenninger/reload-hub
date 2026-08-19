@@ -17,7 +17,7 @@ export function UnitField({ label, unit, ...inputProps }: UnitFieldProps) {
   return (
     <View className="gap-1.5">
       <Text className="text-sm font-medium text-text-muted">{label}</Text>
-      <View className="h-12 flex-row items-center rounded-xl border border-border bg-surface pr-4">
+      <View className="h-12 flex-row items-center rounded-2xl border border-border-strong bg-surface pr-4">
         <TextInput
           className="h-12 flex-1 px-4 py-0 text-text"
           style={{ fontSize: 16, textAlignVertical: 'center' }}

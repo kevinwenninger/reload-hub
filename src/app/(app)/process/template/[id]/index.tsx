@@ -123,7 +123,7 @@ export default function TemplateDetail() {
         {steps.map((step, index) => {
           const hasGuide = step.id in STEP_GUIDE;
           const row = (
-            <View className="flex-row items-start gap-3 rounded-xl border border-border bg-surface p-4">
+            <View className="flex-row items-start gap-3 rounded-card border border-border bg-surface p-4">
               <Text className="w-6 text-sm font-semibold text-text-muted">{index + 1}</Text>
               <View className="flex-1 gap-0.5">
                 <Text className="text-base font-medium text-text">

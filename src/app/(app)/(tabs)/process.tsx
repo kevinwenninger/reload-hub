@@ -4,6 +4,7 @@ import { useCallback, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 
 import { Button } from '@/components/Button';
+import { Heading } from '@/components/Heading';
 import { ErrorState } from '@/components/ErrorState';
 import { PROCESS_INTRO } from '@/content/guide/processIntro';
 import { colors } from '@/lib/colors';
@@ -32,7 +33,7 @@ function RunRow({ run }: { run: ChecklistRun }) {
     <Link href={`/(app)/process/run/${run.id}`} asChild>
       <Pressable
         accessibilityRole="button"
-        className="flex-row items-center gap-3 rounded-xl border border-border bg-surface p-4 active:opacity-70"
+        className="flex-row items-center gap-3 rounded-card border border-border bg-surface p-4 active:opacity-70"
       >
         <View className="flex-1 gap-0.5">
           <Text className="text-base font-semibold text-text">{run.template_name}</Text>
@@ -93,9 +94,9 @@ export default function ProcessScreen() {
 
   return (
     <ScrollView contentContainerClassName="gap-6 p-6">
-      <Text className="text-2xl font-bold text-text">{t.tabs.process}</Text>
+      <Heading eyebrow={t.headings.processEyebrow} title={t.tabs.process} />
 
-      <View className="rounded-xl border border-border bg-surface">
+      <View className="rounded-card border border-border bg-surface">
         <Pressable
           accessibilityRole="button"
           onPress={() => setIntroOpen(!showIntro)}
@@ -142,7 +143,7 @@ export default function ProcessScreen() {
           <Link key={template.id} href={`/(app)/process/template/${template.id}`} asChild>
             <Pressable
               accessibilityRole="button"
-              className="flex-row items-center gap-3 rounded-xl border border-border bg-surface p-4 active:opacity-70"
+              className="flex-row items-center gap-3 rounded-card border border-border bg-surface p-4 active:opacity-70"
             >
               <View className="flex-1 gap-0.5">
                 <Text className="text-base font-semibold text-text">{template.name}</Text>

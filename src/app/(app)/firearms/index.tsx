@@ -56,7 +56,7 @@ export default function FirearmsList() {
             <Link href={`/(app)/firearms/${item.id}`} asChild>
               <Pressable
                 accessibilityRole="button"
-                className="flex-row items-center gap-4 rounded-xl border border-border bg-surface p-4 active:opacity-70"
+                className="flex-row items-center gap-4 rounded-card border border-border bg-surface p-4 active:opacity-70"
               >
                 <MaterialCommunityIcons
                   name={TYPE_ICONS[item.type as FirearmType]}

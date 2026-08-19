@@ -20,8 +20,8 @@ export function FormField({ label, multiline, ...inputProps }: FormFieldProps) {
         multiline={multiline}
         className={
           multiline
-            ? 'min-h-24 rounded-xl border border-border bg-surface px-4 py-3 text-base text-text'
-            : 'h-12 rounded-xl border border-border bg-surface px-4 py-0 text-text'
+            ? 'min-h-24 rounded-2xl border border-border-strong bg-surface px-4 py-3 text-base text-text'
+            : 'h-12 rounded-2xl border border-border-strong bg-surface px-4 py-0 text-text'
         }
         // Single-line: fontSize without lineHeight — an explicit lineHeight
         // (text-base sets 24) pushes text off-center in iOS TextInputs.

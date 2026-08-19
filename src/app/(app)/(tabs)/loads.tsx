@@ -4,6 +4,7 @@ import { useCallback } from 'react';
 import { ActivityIndicator, FlatList, Pressable, Text, View } from 'react-native';
 
 import { Button } from '@/components/Button';
+import { Heading } from '@/components/Heading';
 import { EmptyState } from '@/components/EmptyState';
 import { ErrorState } from '@/components/ErrorState';
 import { LoadDataDisclaimer } from '@/components/LoadDataDisclaimer';
@@ -67,6 +68,7 @@ export default function LoadsScreen() {
 
   return (
     <View className="flex-1 gap-4 p-6">
+      <Heading eyebrow={t.headings.loadsEyebrow} title={t.tabs.loads} />
       {loads.data.length === 0 ? (
         <EmptyState title={t.tabs.loads} body={t.empty.loads} />
       ) : (
@@ -84,7 +86,7 @@ export default function LoadsScreen() {
               <Link href={`/(app)/load/${item.id}`} asChild>
                 <Pressable
                   accessibilityRole="button"
-                  className="flex-row items-center gap-3 rounded-xl border border-border bg-surface p-4 active:opacity-70"
+                  className="flex-row items-center gap-3 rounded-card border border-border bg-surface p-4 active:opacity-70"
                 >
                   <View className="flex-1 gap-0.5">
                     <Text className="text-base font-semibold text-text">

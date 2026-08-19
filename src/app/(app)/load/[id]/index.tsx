@@ -194,7 +194,7 @@ export default function LoadDetail() {
       </View>
 
       {summaries.length === 0 ? (
-        <View className="gap-3 rounded-xl border border-border bg-surface p-4">
+        <View className="gap-3 rounded-card border border-border bg-surface p-4">
           <Text className="text-sm text-text">{t.loads.firstVersionHint}</Text>
           <Button
             label={t.loads.newVersion}

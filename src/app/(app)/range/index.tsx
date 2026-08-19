@@ -41,7 +41,7 @@ export default function RangeScreen() {
             <Link href={`/(app)/session/${item.id}`} asChild>
               <Pressable
                 accessibilityRole="button"
-                className="flex-row items-center gap-3 rounded-xl border border-border bg-surface p-4 active:opacity-70"
+                className="flex-row items-center gap-3 rounded-card border border-border bg-surface p-4 active:opacity-70"
               >
                 <View className="flex-1 gap-0.5">
                   <Text className="text-base font-semibold text-text">

@@ -1,7 +1,7 @@
 import { Stack } from 'expo-router';
 
 import { HeaderBack } from '@/components/HeaderBack';
-import { colors } from '@/lib/colors';
+import { colors, fonts } from '@/lib/colors';
 import { t } from '@/lib/i18n';
 
 export default function FirearmsLayout() {
@@ -11,6 +11,7 @@ export default function FirearmsLayout() {
         headerStyle: { backgroundColor: colors.background },
         headerTintColor: colors.text,
         headerShadowVisible: false,
+        headerTitleStyle: { fontFamily: fonts.display, fontSize: 18, color: colors.ink },
         headerLeft: () => <HeaderBack />,
         contentStyle: { backgroundColor: colors.background },
       }}

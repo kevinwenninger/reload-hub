@@ -3,6 +3,7 @@ import { useCallback, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, Text, View } from 'react-native';
 
 import { Button } from '@/components/Button';
+import { Heading } from '@/components/Heading';
 import { EmptyState } from '@/components/EmptyState';
 import { ErrorState } from '@/components/ErrorState';
 import { SegmentedControl } from '@/components/SegmentedControl';
@@ -48,7 +49,7 @@ function ComponentRow({
     <Link href={`/(app)/catalog/${component.id}`} asChild>
       <Pressable
         accessibilityRole="button"
-        className="flex-row items-center gap-3 rounded-xl border border-border bg-surface p-4 active:opacity-70"
+        className="flex-row items-center gap-3 rounded-card border border-border bg-surface p-4 active:opacity-70"
       >
         <View className="flex-1 gap-0.5">
           <Text className="text-base font-semibold text-text">
@@ -118,6 +119,7 @@ export default function InventoryScreen() {
 
   return (
     <View className="flex-1 gap-4 p-6">
+      <Heading eyebrow={t.headings.inventoryEyebrow} title={t.tabs.inventory} />
       <SegmentedControl
         options={FILTER_OPTIONS}
         value={filter}

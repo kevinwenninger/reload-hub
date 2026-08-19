@@ -17,7 +17,7 @@ export default function StepGuide() {
     <ScrollView contentContainerClassName="gap-5 p-6">
       <Text className="text-2xl font-bold text-text">{entry.title}</Text>
       <Text className="text-base leading-6 text-text">{entry.why}</Text>
-      <View className="gap-2 rounded-xl border border-border bg-surface p-4">
+      <View className="gap-2 rounded-card border border-border bg-surface p-4">
         {entry.tips.map((tip) => (
           <View key={tip} className="flex-row gap-2">
             <Text className="text-text-muted">•</Text>

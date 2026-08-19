@@ -169,7 +169,7 @@ export default function ShotStringEntry() {
         />
 
         {/* Live stats above the list (docs/RANGE_FLOWS.md R3). */}
-        <View className="flex-row justify-between rounded-xl border border-border bg-surface p-4">
+        <View className="flex-row justify-between rounded-card border border-border bg-surface p-4">
           <Text className="text-sm text-text-muted">
             {stats.n} {t.range.shots}
           </Text>
@@ -210,7 +210,7 @@ export default function ShotStringEntry() {
 
         {/* Thumb-zone entry row: big field, big add button (≥48dp). */}
         <View className="flex-row items-center gap-3">
-          <View className="h-14 flex-1 flex-row items-center rounded-xl border border-border bg-surface pr-4">
+          <View className="h-14 flex-1 flex-row items-center rounded-card border border-border bg-surface pr-4">
             <TextInput
               className="h-14 flex-1 px-4 py-0 text-text"
               style={{ fontSize: 22, textAlignVertical: 'center' }}

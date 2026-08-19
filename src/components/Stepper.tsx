@@ -22,7 +22,7 @@ function StepButton({
       accessibilityRole="button"
       disabled={disabled}
       onPress={onPress}
-      className={`h-12 w-12 items-center justify-center rounded-xl border border-border bg-surface-raised active:bg-surface ${disabled ? 'opacity-40' : ''}`}
+      className={`h-12 w-12 items-center justify-center rounded-card border border-border bg-surface-raised active:bg-surface ${disabled ? 'opacity-40' : ''}`}
     >
       <Text className="text-xl font-semibold text-text">{label}</Text>
     </Pressable>

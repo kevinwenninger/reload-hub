@@ -14,7 +14,7 @@ interface LoadDataDisclaimerProps {
 export function LoadDataDisclaimer({ variant = 'compact' }: LoadDataDisclaimerProps) {
   if (variant === 'full') {
     return (
-      <View className="rounded-xl border border-warning bg-surface p-4">
+      <View className="rounded-card border border-warning/60 bg-primary-soft/40 p-4">
         <Text className="text-sm leading-5 text-text">
           {t.safety.loadDataDisclaimer}
         </Text>
@@ -22,7 +22,7 @@ export function LoadDataDisclaimer({ variant = 'compact' }: LoadDataDisclaimerPr
     );
   }
   return (
-    <View className="border-l-2 border-warning bg-surface px-3 py-2">
+    <View className="rounded-xl border-l-4 border-warning bg-primary-soft/40 px-3 py-2">
       <Text className="text-xs leading-4 text-text-muted" numberOfLines={3}>
         {t.safety.loadDataDisclaimer}
       </Text>

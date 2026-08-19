@@ -45,7 +45,7 @@ export default function Onboarding() {
   return (
     <ScrollView contentContainerClassName="flex-grow justify-center gap-8 px-6 py-12">
       <View className="gap-3">
-        <Text className="text-2xl font-bold text-text">
+        <Text className="font-display text-3xl leading-9 text-ink">
           {t.onboarding.safetyTitle}
         </Text>
         <Text className="rounded-xl border border-warning bg-surface p-4 leading-6 text-text">
@@ -53,7 +53,7 @@ export default function Onboarding() {
         </Text>
       </View>
       <View className="gap-3">
-        <Text className="text-xl font-bold text-text">{t.onboarding.unitsTitle}</Text>
+        <Text className="font-display text-2xl leading-8 text-ink">{t.onboarding.unitsTitle}</Text>
         <Text className="text-text-muted">{t.onboarding.unitsSubtitle}</Text>
         <View className="gap-2">
           {(Object.keys(PRESET_LABELS) as PresetKey[]).map((key) => (

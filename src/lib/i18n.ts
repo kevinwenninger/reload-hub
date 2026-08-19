@@ -33,6 +33,7 @@ export const t = {
     profile: 'Profile',
   },
   auth: {
+    tagline: 'Load. Test. Refine.',
     signIn: 'Sign in',
     signUp: 'Create account',
     email: 'Email',
@@ -368,9 +369,17 @@ export const t = {
     deleteRunTitle: 'Discard this run?',
     deleteRunBody: 'Nothing has been booked yet.',
   },
+  headings: {
+    loadsEyebrow: 'Your recipes',
+    inventoryEyebrow: 'On the shelf',
+    processEyebrow: 'At the bench',
+    profileEyebrow: 'You',
+  },
   dashboard: {
     greeting: 'Welcome back',
     readyToTest: 'Ready to test',
+    heroEyebrow: 'Next up at the range',
+    testNow: 'Test it now',
     readyToTestHint: 'Loaded but not yet shot — take these to the range.',
     readyToTestEmpty: 'Nothing waiting. Log a batch on a version and it shows up here.',
     lastSession: 'Last session',

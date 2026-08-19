@@ -30,7 +30,7 @@ function ItemRow({
   }
 
   return (
-    <View className="gap-2 rounded-xl border border-border bg-surface p-4">
+    <View className="gap-2 rounded-card border border-border bg-surface p-4">
       <Text className="text-sm font-medium text-text">{describe(item)}</Text>
       <Text className="text-xs text-text-muted">
         {new Date(item.createdAt).toLocaleString()}

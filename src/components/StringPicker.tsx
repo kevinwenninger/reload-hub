@@ -53,7 +53,7 @@ export function StringPicker({
       <Pressable
         accessibilityRole="button"
         onPress={() => setOpen(true)}
-        className="h-12 flex-row items-center justify-between rounded-xl border border-border bg-surface px-4"
+        className="h-12 flex-row items-center justify-between rounded-2xl border border-border-strong bg-surface px-4"
       >
         <Text
           numberOfLines={1}
@@ -82,7 +82,7 @@ export function StringPicker({
             </Pressable>
           </View>
           <TextInput
-            className="mb-3 h-12 rounded-xl border border-border bg-surface px-4 py-0 text-text"
+            className="mb-3 h-12 rounded-2xl border border-border-strong bg-surface px-4 py-0 text-text"
             style={{ fontSize: 16, textAlignVertical: 'center' }}
             placeholder={t.common.search}
             placeholderTextColor={colors.textMuted}

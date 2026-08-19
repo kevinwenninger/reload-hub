@@ -202,7 +202,7 @@ export default function NewSession() {
         // Came from "Test at the range": the ammunition is the version itself.
         <View className="gap-1.5">
           <Text className="text-sm font-medium text-text-muted">{t.range.ammo}</Text>
-          <View className="min-h-12 justify-center rounded-xl border border-border bg-surface-raised px-4 py-3">
+          <View className="min-h-12 justify-center rounded-card border border-border bg-surface-raised px-4 py-3">
             <Text className="text-base font-medium text-text">
               {presetLoad?.name ?? t.range.ammoLoad} v{presetVersion.version_no}
             </Text>

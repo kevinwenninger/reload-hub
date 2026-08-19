@@ -195,7 +195,7 @@ export default function LoadVersionDetail() {
         <MaterialCommunityIcons name="plus-circle" size={28} color={colors.onPrimary} />
       </Pressable>
 
-      <View className="gap-2 rounded-xl border border-border bg-surface p-4">
+      <View className="gap-2 rounded-card border border-border bg-surface p-4">
         {rows.map((row) => (
           <View key={row.label} className="flex-row justify-between gap-4">
             <Text className="text-sm text-text-muted">{row.label}</Text>
@@ -208,7 +208,7 @@ export default function LoadVersionDetail() {
 
       <View className="gap-3">
         <SectionTitle>{t.loads.costPerRound}</SectionTitle>
-        <View className="gap-2 rounded-xl border border-border bg-surface p-4">
+        <View className="gap-2 rounded-card border border-border bg-surface p-4">
           {(Object.keys(COST_PART_LABELS) as (keyof typeof COST_PART_LABELS)[]).map(
             (part) => (
               <View key={part} className="flex-row justify-between">
@@ -243,7 +243,7 @@ export default function LoadVersionDetail() {
                 key={batch.id}
                 accessibilityRole="button"
                 onLongPress={() => confirmDeleteBatch(batch)}
-                className="flex-row items-center justify-between rounded-xl border border-border bg-surface p-4"
+                className="flex-row items-center justify-between rounded-card border border-border bg-surface p-4"
               >
                 <View className="flex-1 gap-0.5 pr-2">
                   <Text className="text-sm font-medium text-text">{batch.date}</Text>
@@ -276,7 +276,7 @@ export default function LoadVersionDetail() {
               <Link key={session.id} href={`/(app)/session/${session.id}`} asChild>
                 <Pressable
                   accessibilityRole="button"
-                  className="flex-row items-center justify-between rounded-xl border border-border bg-surface p-4 active:opacity-70"
+                  className="flex-row items-center justify-between rounded-card border border-border bg-surface p-4 active:opacity-70"
                 >
                   <View className="flex-1 gap-0.5 pr-2">
                     <Text className="text-sm font-medium text-text">

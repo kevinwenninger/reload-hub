@@ -1,9 +1,11 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Link, router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 
 import { Button } from '@/components/Button';
+import { PressableCard } from '@/components/Card';
+import { Heading, SectionLabel } from '@/components/Heading';
 import { LoadDataDisclaimer } from '@/components/LoadDataDisclaimer';
 import { SyncBadge } from '@/components/SyncBadge';
 import { useAuth } from '@/lib/auth';
@@ -21,15 +23,6 @@ import { listRuns, runState, runSteps } from '@/lib/process';
 import { listSessionsMerged, type RangeSession } from '@/lib/range';
 import { useCachedQuery } from '@/lib/useCachedQuery';
 
-function SectionTitle({ children, hint }: { children: string; hint?: string }) {
-  return (
-    <View className="gap-0.5">
-      <Text className="text-sm font-medium text-text-muted">{children}</Text>
-      {hint ? <Text className="text-xs text-text-muted">{hint}</Text> : null}
-    </View>
-  );
-}
-
 function Card({
   onPress,
   children,
@@ -40,16 +33,10 @@ function Card({
   accent?: boolean;
 }) {
   return (
-    <Pressable
-      accessibilityRole="button"
-      onPress={onPress}
-      className={`flex-row items-center gap-3 rounded-xl border p-4 active:opacity-70 ${
-        accent ? 'border-primary bg-surface-raised' : 'border-border bg-surface'
-      }`}
-    >
+    <PressableCard tone={accent ? 'accent' : 'default'} onPress={onPress} className="flex-row items-center gap-3">
       <View className="flex-1 gap-0.5">{children}</View>
       <MaterialCommunityIcons name="chevron-right" size={20} color={colors.textMuted} />
-    </Pressable>
+    </PressableCard>
   );
 }
 
@@ -115,36 +102,50 @@ export default function HomeScreen() {
 
   return (
     <ScrollView contentContainerClassName="gap-6 p-6">
-      <View className="flex-row items-center justify-between">
-        <View>
-          <Text className="text-sm text-text-muted">{t.dashboard.greeting}</Text>
-          <Text className="text-2xl font-bold text-text">
-            {profile?.display_name ?? t.app.name}
-          </Text>
-        </View>
+      <View className="flex-row items-start justify-between">
+        <Heading eyebrow={t.dashboard.greeting} title={profile?.display_name ?? t.app.name} />
         <SyncBadge />
       </View>
 
       <View className="gap-3">
-        <SectionTitle hint={t.dashboard.readyToTestHint}>{t.dashboard.readyToTest}</SectionTitle>
+        <SectionLabel hint={t.dashboard.readyToTestHint}>{t.dashboard.readyToTest}</SectionLabel>
         {readyToTest.length === 0 ? (
           <Text className="text-sm text-text-muted">{t.dashboard.readyToTestEmpty}</Text>
         ) : (
           <>
             <LoadDataDisclaimer />
-            {readyToTest.map((version) => {
+            {readyToTest.map((version, index) => {
               const load = loadById.get(version.load_id);
+              const hero = index === 0;
+              const go = () =>
+                router.push({
+                  pathname: '/(app)/session/new',
+                  params: { versionId: version.id },
+                });
+              if (hero) {
+                return (
+                  <PressableCard key={version.id} tone="ink" onPress={go} className="gap-3 p-5">
+                    <Text className="font-script text-xl leading-6 text-primary-soft">
+                      {t.dashboard.heroEyebrow}
+                    </Text>
+                    <Text className="font-display text-2xl leading-8 text-on-primary">
+                      {load?.name ?? ''} v{version.version_no}
+                    </Text>
+                    <Text className="text-sm text-on-primary opacity-80">
+                      {[load?.caliber, version.charge_input, `${version.rounds_loaded} ${t.dashboard.rounds}`]
+                        .filter(Boolean)
+                        .join(' · ')}
+                    </Text>
+                    <View className="mt-1 self-start rounded-pill bg-primary px-4 py-2">
+                      <Text className="font-sans-semibold text-sm text-on-primary">
+                        {t.dashboard.testNow}
+                      </Text>
+                    </View>
+                  </PressableCard>
+                );
+              }
               return (
-                <Card
-                  key={version.id}
-                  accent
-                  onPress={() =>
-                    router.push({
-                      pathname: '/(app)/session/new',
-                      params: { versionId: version.id },
-                    })
-                  }
-                >
+                <Card key={version.id} accent onPress={go}>
                   <Text className="text-base font-semibold text-text">
                     {load?.name ?? ''} v{version.version_no}
                   </Text>
@@ -161,7 +162,7 @@ export default function HomeScreen() {
       </View>
 
       <View className="gap-3">
-        <SectionTitle>{t.dashboard.lastSession}</SectionTitle>
+        <SectionLabel>{t.dashboard.lastSession}</SectionLabel>
         {lastSession === null ? (
           <Text className="text-sm text-text-muted">{t.dashboard.noSessions}</Text>
         ) : (
@@ -196,7 +197,7 @@ export default function HomeScreen() {
 
       {activeRuns.length > 0 ? (
         <View className="gap-3">
-          <SectionTitle>{t.dashboard.openChecklists}</SectionTitle>
+          <SectionLabel>{t.dashboard.openChecklists}</SectionLabel>
           {activeRuns.map((run) => {
             const steps = runSteps(run);
             const done = steps.filter((step) => runState(run)[step.id]?.done_at).length;
@@ -213,7 +214,7 @@ export default function HomeScreen() {
       ) : null}
 
       <View className="gap-3">
-        <SectionTitle>{t.dashboard.lowStock}</SectionTitle>
+        <SectionLabel>{t.dashboard.lowStock}</SectionLabel>
         {lowStock.length === 0 ? (
           <Text className="text-sm text-text-muted">{t.dashboard.lowStockEmpty}</Text>
         ) : (

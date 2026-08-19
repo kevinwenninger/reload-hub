@@ -3,7 +3,7 @@ import { Redirect, Tabs } from 'expo-router';
 import type { ColorValue } from 'react-native';
 
 import { useAuth } from '@/lib/auth';
-import { colors } from '@/lib/colors';
+import { colors, fonts } from '@/lib/colors';
 import { t } from '@/lib/i18n';
 
 type IconName = keyof typeof MaterialCommunityIcons.glyphMap;
@@ -30,7 +30,10 @@ export default function TabsLayout() {
         tabBarStyle: {
           backgroundColor: colors.surface,
           borderTopColor: colors.border,
+          height: 84,
+          paddingTop: 8,
         },
+        tabBarLabelStyle: { fontFamily: fonts.sansMedium, fontSize: 11 },
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textMuted,
       }}

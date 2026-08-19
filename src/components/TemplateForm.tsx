@@ -101,7 +101,7 @@ export function TemplateForm({
       <Text className="text-sm font-medium text-text-muted">{t.process.steps}</Text>
       <View className="gap-3">
         {steps.map((step, index) => (
-          <View key={step.id} className="gap-3 rounded-xl border border-border bg-surface p-4">
+          <View key={step.id} className="gap-3 rounded-card border border-border bg-surface p-4">
             <View className="flex-row items-center justify-between">
               <Text className="text-sm font-semibold text-text-muted">{index + 1}</Text>
               <View className="flex-row">

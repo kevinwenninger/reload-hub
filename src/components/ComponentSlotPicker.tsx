@@ -70,7 +70,7 @@ export function ComponentSlotPicker({
       <Pressable
         accessibilityRole="button"
         onPress={openPicker}
-        className="min-h-12 flex-row items-center gap-3 rounded-xl border border-border bg-surface px-4 py-2 active:opacity-70"
+        className="min-h-12 flex-row items-center gap-3 rounded-card border border-border bg-surface px-4 py-2 active:opacity-70"
       >
         <Text className="w-16 text-sm font-medium text-text-muted">{label}</Text>
         <View className="flex-1">

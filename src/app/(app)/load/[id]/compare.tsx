@@ -116,7 +116,7 @@ export default function CompareVersions() {
         </View>
       </View>
 
-      <View className="rounded-xl border border-border bg-surface">
+      <View className="rounded-card border border-border bg-surface">
         <View className="flex-row border-b border-border p-3">
           <Text className="flex-1 text-xs font-semibold uppercase text-text-muted">
             {t.loads.parameter}

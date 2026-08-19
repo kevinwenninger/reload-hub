@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 
 import { Button } from '@/components/Button';
+import { Heading } from '@/components/Heading';
 import { ErrorState } from '@/components/ErrorState';
 import { Stepper } from '@/components/Stepper';
 import { useAuth, type Profile } from '@/lib/auth';
@@ -130,16 +131,16 @@ export default function ProfileScreen() {
 
   return (
     <ScrollView contentContainerClassName="gap-6 p-6">
-      <Text className="text-2xl font-bold text-text">{t.profile.title}</Text>
+      <Heading eyebrow={t.headings.profileEyebrow} title={t.profile.title} />
 
-      <View className="gap-3 rounded-xl border border-border bg-surface p-4">
+      <View className="gap-3 rounded-card border border-border bg-surface p-4">
         <Text className="text-sm font-medium text-text-muted">
           {t.profile.account}
         </Text>
         <View className="gap-1.5">
           <Text className="text-sm text-text-muted">{t.profile.displayName}</Text>
           <TextInput
-            className="h-12 rounded-xl border border-border bg-surface-raised px-4 py-0 text-text"
+            className="h-12 rounded-card border border-border bg-surface-raised px-4 py-0 text-text"
             style={{ fontSize: 16, textAlignVertical: 'center' }}
             placeholder={t.profile.displayNamePlaceholder}
             placeholderTextColor={colors.textMuted}
@@ -152,7 +153,7 @@ export default function ProfileScreen() {
         <Text className="text-sm text-text-muted">{session?.user.email}</Text>
       </View>
 
-      <View className="gap-3 rounded-xl border border-border bg-surface p-4">
+      <View className="gap-3 rounded-card border border-border bg-surface p-4">
         <Text className="text-sm font-medium text-text-muted">{t.profile.units}</Text>
         <Text className="text-xs text-text-muted">{t.profile.unitsHint}</Text>
         {(Object.keys(UNIT_ROW_LABELS) as (keyof UnitPrefs)[]).map((quantity) => (
@@ -177,7 +178,7 @@ export default function ProfileScreen() {
         ))}
       </View>
 
-      <View className="gap-3 rounded-xl border border-border bg-surface p-4">
+      <View className="gap-3 rounded-card border border-border bg-surface p-4">
         <Text className="text-sm font-medium text-text-muted">{t.profile.costs}</Text>
         <View className="flex-row items-center justify-between">
           <Text className="flex-1 pr-4 text-text-muted">
@@ -195,7 +196,7 @@ export default function ProfileScreen() {
       <Link href="/(app)/range" asChild>
         <Pressable
           accessibilityRole="button"
-          className="min-h-12 flex-row items-center justify-between rounded-xl border border-border bg-surface p-4 active:opacity-70"
+          className="min-h-12 flex-row items-center justify-between rounded-card border border-border bg-surface p-4 active:opacity-70"
         >
           <View className="flex-1 gap-0.5 pr-2">
             <Text className="text-base font-semibold text-text">
@@ -214,7 +215,7 @@ export default function ProfileScreen() {
       <Link href="/(app)/firearms" asChild>
         <Pressable
           accessibilityRole="button"
-          className="min-h-12 flex-row items-center justify-between rounded-xl border border-border bg-surface p-4 active:opacity-70"
+          className="min-h-12 flex-row items-center justify-between rounded-card border border-border bg-surface p-4 active:opacity-70"
         >
           <View className="flex-1 gap-0.5 pr-2">
             <Text className="text-base font-semibold text-text">

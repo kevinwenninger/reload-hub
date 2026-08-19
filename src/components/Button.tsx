@@ -5,16 +5,20 @@ import { colors } from '@/lib/colors';
 interface ButtonProps {
   label: string;
   onPress: () => void;
-  variant?: 'primary' | 'secondary' | 'danger';
+  variant?: 'primary' | 'secondary' | 'ink' | 'danger' | 'ghost';
   disabled?: boolean;
   loading?: boolean;
 }
 
 const containerClasses: Record<NonNullable<ButtonProps['variant']>, string> = {
   primary: 'bg-primary active:bg-primary-dark',
-  secondary: 'bg-surface-raised border border-border active:bg-surface',
-  danger: 'bg-danger active:opacity-80',
+  ink: 'bg-ink active:opacity-90',
+  secondary: 'bg-surface border border-border-strong active:bg-surface-raised',
+  danger: 'bg-danger active:opacity-85',
+  ghost: 'bg-transparent active:bg-surface-raised',
 };
+
+const filledVariants = new Set(['primary', 'ink', 'danger']);
 
 export function Button({
   label,
@@ -23,20 +27,20 @@ export function Button({
   disabled = false,
   loading = false,
 }: ButtonProps) {
-  const filled = variant === 'primary' || variant === 'danger';
+  const filled = filledVariants.has(variant);
   return (
     <Pressable
       accessibilityRole="button"
       disabled={disabled || loading}
       onPress={onPress}
-      // Range design rule: touch targets ≥ 48dp.
-      className={`min-h-12 items-center justify-center rounded-xl px-4 py-3 ${containerClasses[variant]} ${disabled ? 'opacity-50' : ''}`}
+      // Range design rule: touch targets ≥ 48dp. Pill radius for warmth.
+      className={`min-h-[52px] items-center justify-center rounded-pill px-5 py-3 ${containerClasses[variant]} ${disabled ? 'opacity-50' : ''}`}
     >
       {loading ? (
         <ActivityIndicator color={filled ? colors.onPrimary : colors.text} />
       ) : (
         <Text
-          className={`text-base font-semibold ${filled ? 'text-on-primary' : 'text-text'}`}
+          className={`font-sans-semibold text-base ${filled ? 'text-on-primary' : variant === 'ghost' ? 'text-primary' : 'text-text'}`}
         >
           {label}
         </Text>

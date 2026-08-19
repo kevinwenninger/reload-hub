@@ -43,7 +43,8 @@ export default function SignUp() {
         keyboardShouldPersistTaps="handled"
       >
         <View className="gap-1">
-          <Text className="text-3xl font-bold text-text">{t.app.name}</Text>
+          <Text className="font-script text-2xl leading-7 text-primary">{t.auth.tagline}</Text>
+          <Text className="font-display text-4xl leading-[44px] text-ink">{t.app.name}</Text>
           <Text className="text-text-muted">{t.auth.signUp}</Text>
         </View>
         {confirmationSent ? (
