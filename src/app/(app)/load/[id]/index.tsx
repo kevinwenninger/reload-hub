@@ -43,7 +43,7 @@ function VersionCard({
   summary: VersionSummary;
   isFavorite: boolean;
 }) {
-  const { version, tests, avgRating, lastLessons } = summary;
+  const { version, tests, avgRating } = summary;
   return (
     <Link href={`/(app)/load/${loadId}/versions/${version.id}`} asChild>
       <Pressable
@@ -81,11 +81,6 @@ function VersionCard({
             </View>
           ) : null}
         </View>
-        {lastLessons ? (
-          <Text className="text-xs italic text-text-muted" numberOfLines={2}>
-            {lastLessons}
-          </Text>
-        ) : null}
       </Pressable>
     </Link>
   );
@@ -217,9 +212,6 @@ export default function LoadDetail() {
 
           <View className="gap-2">
             <Text className="text-sm font-medium text-text-muted">{t.loads.development}</Text>
-            {favorite ? null : (
-              <Text className="text-xs text-text-muted">{t.loads.developmentHint}</Text>
-            )}
             {others.map((summary) => (
               <VersionCard key={summary.version.id} loadId={id} summary={summary} isFavorite={false} />
             ))}

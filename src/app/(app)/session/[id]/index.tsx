@@ -3,7 +3,6 @@ import { useCallback, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 
 import { Button } from '@/components/Button';
-import { LoadDataDisclaimer } from '@/components/LoadDataDisclaimer';
 import { SessionSummary } from '@/components/SessionSummary';
 import { SyncBadge } from '@/components/SyncBadge';
 import { showErrorAlert } from '@/lib/errors';
@@ -87,16 +86,15 @@ export default function SessionHub() {
     <>
       <Stack.Screen options={{ headerRight: () => <SyncBadge /> }} />
       <ScrollView contentContainerClassName="gap-5 p-6">
-        <View className="gap-1 rounded-card border border-border bg-surface p-4">
+        <View className="gap-0.5">
           <Text className="text-base font-semibold text-text">
             {[session.location, session.distance_input].filter(Boolean).join(' · ')}
           </Text>
           <Text className="text-sm text-text-muted">
             {version !== null
-              ? `${t.range.ammoLoad}: v${version.version_no}${version.charge_input ? ` — ${version.charge_input}` : ''}`
-              : `${t.range.ammoFactory}${session.ammo_note ? `: ${session.ammo_note}` : ''}`}
+              ? `${load?.name ?? t.range.ammoLoad} v${version.version_no}`
+              : (session.ammo_note ?? t.range.ammoFactory)}
           </Text>
-          {version !== null ? <LoadDataDisclaimer /> : null}
         </View>
 
         <View className="gap-1.5">

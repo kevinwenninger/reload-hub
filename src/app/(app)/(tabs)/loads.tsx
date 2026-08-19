@@ -7,7 +7,6 @@ import { Button } from '@/components/Button';
 import { Heading } from '@/components/Heading';
 import { EmptyState } from '@/components/EmptyState';
 import { ErrorState } from '@/components/ErrorState';
-import { LoadDataDisclaimer } from '@/components/LoadDataDisclaimer';
 import { colors } from '@/lib/colors';
 import { listFirearms } from '@/lib/firearms';
 import { t } from '@/lib/i18n';
@@ -103,9 +102,7 @@ export default function LoadsScreen() {
                           <MaterialCommunityIcons name="star" size={12} color={colors.primary} />
                         ) : null}
                         <Text className="text-xs text-text-muted">
-                          v{shown.version_no}
-                          {shown.charge_input ? ` · ${shown.charge_input}` : ''} ·{' '}
-                          {own.length} {t.loads.versions.toLowerCase()}
+                          v{shown.version_no} · {own.length} {t.loads.versions.toLowerCase()}
                         </Text>
                       </View>
                     ) : null}
@@ -121,9 +118,6 @@ export default function LoadsScreen() {
           }}
         />
       )}
-      {loads.data.length > 0 ? (
-        <LoadDataDisclaimer />
-      ) : null}
       <Button label={t.loads.add} onPress={() => router.push('/(app)/load/new')} />
     </View>
   );

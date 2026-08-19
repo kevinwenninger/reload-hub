@@ -6,7 +6,6 @@ import { ScrollView, Text, View } from 'react-native';
 import { Button } from '@/components/Button';
 import { PressableCard } from '@/components/Card';
 import { Heading, SectionLabel } from '@/components/Heading';
-import { LoadDataDisclaimer } from '@/components/LoadDataDisclaimer';
 import { SyncBadge } from '@/components/SyncBadge';
 import { useAuth } from '@/lib/auth';
 import { colors } from '@/lib/colors';
@@ -98,7 +97,7 @@ export default function HomeScreen() {
       stock: stockForComponent(lots.data ?? [], component.id, component.type as ComponentType),
     }))
     .filter(({ stock }) => stock.low)
-    .slice(0, 5);
+    .slice(0, 3);
 
   return (
     <ScrollView contentContainerClassName="gap-6 p-6">
@@ -107,13 +106,11 @@ export default function HomeScreen() {
         <SyncBadge />
       </View>
 
+      {readyToTest.length === 0 ? null : (
       <View className="gap-3">
-        <SectionLabel hint={t.dashboard.readyToTestHint}>{t.dashboard.readyToTest}</SectionLabel>
-        {readyToTest.length === 0 ? (
-          <Text className="text-sm text-text-muted">{t.dashboard.readyToTestEmpty}</Text>
-        ) : (
+        <SectionLabel>{t.dashboard.readyToTest}</SectionLabel>
+        {(
           <>
-            <LoadDataDisclaimer />
             {readyToTest.map((version, index) => {
               const load = loadById.get(version.load_id);
               const hero = index === 0;
@@ -132,7 +129,7 @@ export default function HomeScreen() {
                       {load?.name ?? ''} v{version.version_no}
                     </Text>
                     <Text className="text-sm text-on-primary opacity-80">
-                      {[load?.caliber, version.charge_input, `${version.rounds_loaded} ${t.dashboard.rounds}`]
+                      {[load?.caliber, `${version.rounds_loaded} ${t.dashboard.rounds}`]
                         .filter(Boolean)
                         .join(' · ')}
                     </Text>
@@ -150,7 +147,7 @@ export default function HomeScreen() {
                     {load?.name ?? ''} v{version.version_no}
                   </Text>
                   <Text className="text-sm text-text-muted">
-                    {[load?.caliber, version.charge_input, `${version.rounds_loaded} ${t.dashboard.rounds}`]
+                    {[load?.caliber, `${version.rounds_loaded} ${t.dashboard.rounds}`]
                       .filter(Boolean)
                       .join(' · ')}
                   </Text>
@@ -160,6 +157,7 @@ export default function HomeScreen() {
           </>
         )}
       </View>
+      )}
 
       <View className="gap-3">
         <SectionLabel>{t.dashboard.lastSession}</SectionLabel>
@@ -172,13 +170,9 @@ export default function HomeScreen() {
               {lastFirearm ? ` · ${lastFirearm.name}` : ''}
             </Text>
             <Text className="text-sm text-text-muted">
-              {[
-                lastLoad && lastVersion ? `${lastLoad.name} v${lastVersion.version_no}` : lastSession.ammo_note,
-                lastSession.location,
-                lastSession.distance_input,
-              ]
-                .filter(Boolean)
-                .join(' · ')}
+              {lastLoad && lastVersion
+                ? `${lastLoad.name} v${lastVersion.version_no}`
+                : (lastSession.ammo_note ?? lastSession.location ?? '')}
             </Text>
             {lastSession.rating !== null ? (
               <View className="flex-row items-center gap-0.5">
@@ -213,11 +207,10 @@ export default function HomeScreen() {
         </View>
       ) : null}
 
+      {lowStock.length === 0 ? null : (
       <View className="gap-3">
         <SectionLabel>{t.dashboard.lowStock}</SectionLabel>
-        {lowStock.length === 0 ? (
-          <Text className="text-sm text-text-muted">{t.dashboard.lowStockEmpty}</Text>
-        ) : (
+        {(
           lowStock.map(({ component, stock }) => (
             <Card key={component.id} onPress={() => router.push(`/(app)/catalog/${component.id}`)}>
               <Text className="text-base font-semibold text-text">
@@ -231,6 +224,7 @@ export default function HomeScreen() {
           ))
         )}
       </View>
+      )}
 
       <Link href="/(app)/load/new" asChild>
         <Button label={t.dashboard.newLoad} onPress={() => {}} />

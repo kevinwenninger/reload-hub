@@ -1,6 +1,6 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Link, router, useFocusEffect, useLocalSearchParams } from 'expo-router';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View } from 'react-native';
 
 import { Button } from '@/components/Button';
@@ -37,6 +37,7 @@ export default function LoadVersionDetail() {
   const { id, versionId } = useLocalSearchParams<{ id: string; versionId: string }>();
   const { profile } = useAuth();
   const isOnline = useIsOnline();
+  const [costOpen, setCostOpen] = useState(false);
 
   const version = useCachedQuery<LoadVersion>(`version:${versionId}`, async () => {
     const { data, error } = await supabase
@@ -124,7 +125,9 @@ export default function LoadVersionDetail() {
 
   const data = version.data;
   const summary = summarizeVersions([data], sessions.data ?? [])[0];
-  const rows = versionRows(data, components.data ?? [], lots.data ?? []);
+  const rows = versionRows(data, components.data ?? [], lots.data ?? []).filter(
+    (row) => row.value !== '—',
+  );
   const stock = roundsPossible(data, lots.data ?? []);
   const cost = costForVersion(
     data,
@@ -206,31 +209,43 @@ export default function LoadVersionDetail() {
         ))}
       </View>
 
-      <View className="gap-3">
-        <SectionTitle>{t.loads.costPerRound}</SectionTitle>
-        <View className="gap-2 rounded-card border border-border bg-surface p-4">
-          {(Object.keys(COST_PART_LABELS) as (keyof typeof COST_PART_LABELS)[]).map(
-            (part) => (
-              <View key={part} className="flex-row justify-between">
-                <Text className="text-sm text-text-muted">{COST_PART_LABELS[part]}</Text>
-                <Text className="text-sm font-medium text-text">
-                  {formatEur(cost[part])}
-                </Text>
-              </View>
-            ),
-          )}
-          <View className="flex-row justify-between border-t border-border pt-2">
-            <Text className="font-semibold text-text">{t.loads.costPerRound}</Text>
+      <Pressable
+        accessibilityRole="button"
+        onPress={() => setCostOpen(!costOpen)}
+        className="gap-2 rounded-card border border-border bg-surface p-4"
+      >
+        <View className="flex-row items-center justify-between">
+          <Text className="font-semibold text-text">{t.loads.costPerRound}</Text>
+          <View className="flex-row items-center gap-2">
             <Text className="font-semibold text-text">{formatEur(cost.total)}</Text>
+            <MaterialCommunityIcons
+              name={costOpen ? 'chevron-up' : 'chevron-down'}
+              size={20}
+              color={colors.textMuted}
+            />
           </View>
-          {cost.missing.length > 0 ? (
-            <Text className="text-xs text-text-muted">
-              {t.loads.costMissing}:{' '}
-              {cost.missing.map((part) => COST_PART_LABELS[part]).join(', ')}
-            </Text>
-          ) : null}
         </View>
-      </View>
+        {costOpen ? (
+          <View className="gap-2 border-t border-border pt-2">
+            {(Object.keys(COST_PART_LABELS) as (keyof typeof COST_PART_LABELS)[]).map(
+              (part) => (
+                <View key={part} className="flex-row justify-between">
+                  <Text className="text-sm text-text-muted">{COST_PART_LABELS[part]}</Text>
+                  <Text className="text-sm font-medium text-text">
+                    {formatEur(cost[part])}
+                  </Text>
+                </View>
+              ),
+            )}
+            {cost.missing.length > 0 ? (
+              <Text className="text-xs text-text-muted">
+                {t.loads.costMissing}:{' '}
+                {cost.missing.map((part) => COST_PART_LABELS[part]).join(', ')}
+              </Text>
+            ) : null}
+          </View>
+        ) : null}
+      </Pressable>
 
       <View className="gap-3">
         <SectionTitle>{t.loads.batches}</SectionTitle>
@@ -338,7 +353,6 @@ export default function LoadVersionDetail() {
             {isFavorite ? t.loads.unmarkFavorite : t.loads.markFavorite}
           </Text>
         </Pressable>
-        <Text className="text-center text-xs text-text-muted">{t.loads.favoriteHint}</Text>
       </View>
     </ScrollView>
   );

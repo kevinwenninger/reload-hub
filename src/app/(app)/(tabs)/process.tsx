@@ -56,8 +56,8 @@ function RunRow({ run }: { run: ChecklistRun }) {
 
 export default function ProcessScreen() {
   const isOnline = useIsOnline();
-  // Beginner context: open by default until the user has their own template.
-  const [introOpen, setIntroOpen] = useState<boolean | null>(null);
+  // Beginner context stays collapsed until tapped — one calm line, no wall of text.
+  const [introOpen, setIntroOpen] = useState(false);
   const templates = useCachedQuery('templates', listTemplates);
   const runs = useCachedQuery('runs', listRuns);
   const refetchTemplates = templates.refetch;
@@ -90,7 +90,7 @@ export default function ProcessScreen() {
   const completed = (runs.data ?? []).filter((run) => run.completed_at !== null);
   const system = templates.data.filter(isSystemTemplate);
   const mine = templates.data.filter((template) => !isSystemTemplate(template));
-  const showIntro = introOpen ?? mine.length === 0;
+  const showIntro = introOpen;
 
   return (
     <ScrollView contentContainerClassName="gap-6 p-6">
@@ -106,9 +106,11 @@ export default function ProcessScreen() {
             <MaterialCommunityIcons name="school-outline" size={20} color={colors.primary} />
             <Text className="text-base font-semibold text-text">{t.process.intro}</Text>
           </View>
-          <Text className="text-sm text-primary">
-            {showIntro ? t.process.introHide : t.process.introShow}
-          </Text>
+          <MaterialCommunityIcons
+            name={showIntro ? 'chevron-up' : 'chevron-down'}
+            size={22}
+            color={colors.textMuted}
+          />
         </Pressable>
         {showIntro ? (
           <View className="gap-4 border-t border-border px-4 pb-4 pt-3">
@@ -149,7 +151,6 @@ export default function ProcessScreen() {
                 <Text className="text-base font-semibold text-text">{template.name}</Text>
                 <Text className="text-sm text-text-muted">
                   {templateSteps(template).length} {t.process.steps.toLowerCase()}
-                  {isSystemTemplate(template) ? ` · ${t.process.systemTemplate}` : ''}
                 </Text>
               </View>
               <MaterialCommunityIcons name="chevron-right" size={22} color={colors.textMuted} />
@@ -166,7 +167,7 @@ export default function ProcessScreen() {
       {completed.length > 0 ? (
         <View className="gap-3">
           <SectionTitle>{t.process.completedRuns}</SectionTitle>
-          {completed.slice(0, 10).map((run) => (
+          {completed.slice(0, 3).map((run) => (
             <RunRow key={run.id} run={run} />
           ))}
         </View>
