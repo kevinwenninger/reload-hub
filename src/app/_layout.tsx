@@ -1,7 +1,4 @@
 import {
-  Caveat_600SemiBold,
-} from '@expo-google-fonts/caveat';
-import {
   Fraunces_500Medium_Italic,
   Fraunces_600SemiBold,
 } from '@expo-google-fonts/fraunces';
@@ -32,7 +29,6 @@ export default function RootLayout() {
     Inter_400Regular,
     Inter_500Medium,
     Inter_600SemiBold,
-    Caveat_600SemiBold,
   });
 
   useEffect(() => {

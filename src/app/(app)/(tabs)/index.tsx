@@ -125,7 +125,7 @@ export default function HomeScreen() {
               if (hero) {
                 return (
                   <PressableCard key={version.id} tone="ink" onPress={go} className="gap-3 p-5">
-                    <Text className="font-script text-xl leading-6 text-primary-soft">
+                    <Text className="font-sans-semibold text-xs uppercase tracking-[3px] text-primary-soft">
                       {t.dashboard.heroEyebrow}
                     </Text>
                     <Text className="font-display text-2xl leading-8 text-on-primary">

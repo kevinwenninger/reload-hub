@@ -38,5 +38,4 @@ export const fonts = {
   sans: 'Inter_400Regular',
   sansMedium: 'Inter_500Medium',
   sansSemibold: 'Inter_600SemiBold',
-  script: 'Caveat_600SemiBold',
 } as const;

@@ -26,13 +26,12 @@ module.exports = {
     extend: {
       colors,
       fontFamily: {
-        // Serif display for headings, humanist sans for UI, script for accents.
+        // Serif display for headings, humanist sans for UI (tracked caps for eyebrows).
         display: ['Fraunces_600SemiBold'],
         'display-italic': ['Fraunces_500Medium_Italic'],
         sans: ['Inter_400Regular'],
         'sans-medium': ['Inter_500Medium'],
         'sans-semibold': ['Inter_600SemiBold'],
-        script: ['Caveat_600SemiBold'],
       },
       borderRadius: {
         card: '20px',
