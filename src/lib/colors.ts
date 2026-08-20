@@ -17,6 +17,10 @@ export const colors = {
   textMuted: '#8A857B',
   border: '#E4DED0', // hairline
   borderStrong: '#D8D2C2', // Light Stone
+  moss: '#54661C', // komoot-style action green (CTAs, selection)
+  mossDark: '#425116',
+  mossSoft: '#EDF0DB', // pale green tint for selected cards
+  lime: '#B5C34D', // light green accent (on dark surfaces)
   danger: '#A63D2A',
   warning: '#C08A3E',
   success: '#5F7A5A',

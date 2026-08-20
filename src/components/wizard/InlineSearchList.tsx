@@ -55,7 +55,7 @@ export function InlineSearchList({
               accessibilityState={{ selected }}
               onPress={() => onChange(item)}
               className={`mb-2 min-h-12 justify-center rounded-card border-2 px-4 py-3 ${
-                selected ? 'border-primary bg-primary-soft/50' : 'border-transparent bg-surface'
+                selected ? 'border-moss bg-moss-soft' : 'border-transparent bg-surface'
               }`}
             >
               <Text className={`text-base ${selected ? 'font-sans-semibold text-text' : 'text-text'}`}>

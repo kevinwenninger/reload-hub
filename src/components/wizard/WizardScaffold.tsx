@@ -36,7 +36,7 @@ export function WizardScaffold({
         {Array.from({ length: totalSteps }, (_, index) => (
           <View
             key={index}
-            className={`h-1.5 flex-1 rounded-pill ${index <= step ? 'bg-primary' : 'bg-surface-raised'}`}
+            className={`h-1.5 flex-1 rounded-pill ${index <= step ? 'bg-moss' : 'bg-surface-raised'}`}
           />
         ))}
       </View>
@@ -66,7 +66,7 @@ export function WizardScaffold({
           accessibilityRole="button"
           disabled={ctaDisabled}
           onPress={onNext}
-          className={`h-14 flex-row items-center justify-center gap-2 rounded-pill bg-ink active:opacity-90 ${ctaDisabled ? 'opacity-40' : ''}`}
+          className={`h-14 flex-row items-center justify-center gap-2 rounded-pill bg-moss active:bg-moss-dark ${ctaDisabled ? 'opacity-40' : ''}`}
         >
           <Text className="font-sans-semibold text-base text-on-primary">
             {ctaLabel ?? t.wizard.next}

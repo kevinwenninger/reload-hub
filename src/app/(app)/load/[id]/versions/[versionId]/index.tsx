@@ -341,7 +341,7 @@ export default function LoadVersionDetail() {
           accessibilityRole="button"
           onPress={() => void toggleFavorite()}
           className={`min-h-12 flex-row items-center justify-center gap-2 rounded-xl border px-4 py-3 ${
-            isFavorite ? 'border-primary bg-surface-raised' : 'border-border bg-surface'
+            isFavorite ? 'border-moss bg-moss-soft' : 'border-border bg-surface'
           } active:opacity-70`}
         >
           <MaterialCommunityIcons

@@ -63,7 +63,7 @@ export default function Onboarding() {
               accessibilityState={{ selected: preset === key }}
               onPress={() => setPreset(key)}
               className={`min-h-12 justify-center rounded-xl border px-4 py-3 ${
-                preset === key ? 'border-primary bg-surface-raised' : 'border-border bg-surface'
+                preset === key ? 'border-moss bg-moss-soft' : 'border-border bg-surface'
               }`}
             >
               <Text className="text-base text-text">{PRESET_LABELS[key]}</Text>

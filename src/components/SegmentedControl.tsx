@@ -20,7 +20,7 @@ export function SegmentedControl<T extends string>({
           accessibilityState={{ selected: option.value === value }}
           onPress={() => onChange(option.value)}
           className={`min-h-10 flex-1 items-center justify-center rounded-pill px-2 py-2 ${
-            option.value === value ? 'bg-primary' : ''
+            option.value === value ? 'bg-moss' : ''
           }`}
         >
           <Text

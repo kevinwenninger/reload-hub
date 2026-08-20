@@ -133,8 +133,8 @@ export default function HomeScreen() {
                         .filter(Boolean)
                         .join(' · ')}
                     </Text>
-                    <View className="mt-1 self-start rounded-pill bg-primary px-4 py-2">
-                      <Text className="font-sans-semibold text-sm text-on-primary">
+                    <View className="mt-1 self-start rounded-pill bg-lime px-4 py-2">
+                      <Text className="font-sans-semibold text-sm text-ink">
                         {t.dashboard.testNow}
                       </Text>
                     </View>

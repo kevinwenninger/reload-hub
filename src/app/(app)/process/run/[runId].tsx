@@ -155,7 +155,7 @@ export default function RunScreen() {
               disabled={completed}
               onPress={() => void toggle(step.id)}
               className={`flex-row items-start gap-3 rounded-xl border p-4 ${
-                done ? 'border-primary bg-surface-raised' : 'border-border bg-surface'
+                done ? 'border-moss bg-moss-soft' : 'border-border bg-surface'
               } ${completed ? 'opacity-70' : ''}`}
             >
               <MaterialCommunityIcons

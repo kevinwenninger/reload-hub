@@ -11,7 +11,7 @@ interface ButtonProps {
 }
 
 const containerClasses: Record<NonNullable<ButtonProps['variant']>, string> = {
-  primary: 'bg-primary active:bg-primary-dark',
+  primary: 'bg-moss active:bg-moss-dark',
   ink: 'bg-ink active:opacity-90',
   secondary: 'bg-surface border border-border-strong active:bg-surface-raised',
   danger: 'bg-danger active:opacity-85',

@@ -49,7 +49,7 @@ function VersionCard({
       <Pressable
         accessibilityRole="button"
         className={`gap-2 rounded-xl border p-4 active:opacity-70 ${
-          isFavorite ? 'border-primary bg-surface-raised' : 'border-border bg-surface'
+          isFavorite ? 'border-moss bg-moss-soft' : 'border-border bg-surface'
         }`}
       >
         <View className="flex-row items-center gap-2">

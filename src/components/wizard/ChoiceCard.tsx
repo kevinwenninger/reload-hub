@@ -28,7 +28,7 @@ export function ChoiceCard({
       accessibilityState={{ selected }}
       onPress={onPress}
       className={`${half ? 'flex-1' : ''} flex-row items-center gap-3 rounded-card border-2 p-3 ${
-        selected ? 'border-primary bg-primary-soft/50' : 'border-transparent bg-surface'
+        selected ? 'border-moss bg-moss-soft' : 'border-transparent bg-surface'
       }`}
       style={cardShadow}
     >

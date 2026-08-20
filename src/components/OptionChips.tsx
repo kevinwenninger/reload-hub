@@ -28,7 +28,7 @@ export function OptionChips<T extends string>({
               onPress={() => onChange(option.value)}
               className={`min-h-10 items-center justify-center rounded-full border px-4 py-2 ${
                 selected
-                  ? 'border-primary bg-primary'
+                  ? 'border-moss bg-moss'
                   : 'border-border bg-surface'
               }`}
             >

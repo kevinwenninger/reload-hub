@@ -123,7 +123,7 @@ export default function FinishSession() {
                 accessibilityState={{ checked }}
                 onPress={() => toggleFlag(flag)}
                 className={`min-h-12 flex-row items-center justify-between rounded-xl border px-4 py-3 ${
-                  checked ? 'border-primary bg-surface-raised' : 'border-border bg-surface'
+                  checked ? 'border-moss bg-moss-soft' : 'border-border bg-surface'
                 }`}
               >
                 <Text className="text-base text-text">{FLAG_LABELS[flag]}</Text>
