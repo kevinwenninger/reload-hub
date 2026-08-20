@@ -182,20 +182,20 @@ export default function LoadVersionDetail() {
       <Pressable
         accessibilityRole="button"
         onPress={() => router.push(`/(app)/load/${id}/versions/${versionId}/batch`)}
-        className="flex-row items-center justify-between rounded-xl bg-primary px-4 py-3 active:bg-primary-dark"
+        className="flex-row items-center gap-3 rounded-card bg-moss px-4 py-3.5 active:bg-moss-dark"
       >
-        <View className="gap-0.5">
-          <Text className="text-base font-semibold text-on-primary">
+        <View className="flex-1 gap-0.5">
+          <Text className="font-sans-semibold text-base text-on-primary">
             {t.loads.logBatch}
           </Text>
-          <Text className="text-xs text-on-primary opacity-80">
+          <Text className="text-xs leading-4 text-on-primary opacity-80">
             {t.loads.roundsLoaded}: {data.rounds_loaded ?? 0}
             {stock !== null
-              ? ` · ${t.loads.stockAllows} ${stock.rounds} ${t.loads.moreRounds} (${t.loads.limitedBy} ${COST_PART_LABELS[stock.limiting].toLowerCase()})`
+              ? ` · ${t.loads.stockAllows} ${stock.rounds} ${t.loads.moreRounds}`
               : ''}
           </Text>
         </View>
-        <MaterialCommunityIcons name="plus-circle" size={28} color={colors.onPrimary} />
+        <MaterialCommunityIcons name="plus-circle" size={26} color={colors.onPrimary} />
       </Pressable>
 
       <View className="gap-2 rounded-card border border-border bg-surface p-4">
