@@ -28,11 +28,9 @@ import { t } from '@/lib/i18n';
 import { MANUFACTURERS } from '@/lib/manufacturers';
 import {
   UNIT_PRESETS,
-  lengthToMm,
   makeInput,
   massToMg,
   mgToMass,
-  mmToLength,
   parseDecimal,
   type UnitPrefs,
 } from '@/lib/units';
@@ -101,11 +99,6 @@ export function ComponentForm({
       ? ''
       : prefill(mgToMass(initialAttrs.weight_mg, prefs.mass), 3),
   );
-  const [diameterText, setDiameterText] = useState(
-    initialAttrs.diameter_mm === undefined
-      ? ''
-      : prefill(mmToLength(initialAttrs.diameter_mm, prefs.length), 3),
-  );
   const [bulletType, setBulletType] = useState<string | null>(
     initialAttrs.bullet_type ?? null,
   );
@@ -115,7 +108,6 @@ export function ComponentForm({
   );
 
   const weight = parseDecimal(weightText);
-  const diameter = parseDecimal(diameterText);
 
   const typeValid =
     type === 'bullet'
@@ -133,11 +125,10 @@ export function ComponentForm({
           weight_mg: massToMg(weight!, prefs.mass),
           weight_input: makeInput(weightText.trim(), prefs.mass),
           bullet_type: bulletType ?? undefined,
+          // Preserve legacy diameter values recorded before the field was removed.
+          diameter_mm: initialAttrs.diameter_mm,
+          diameter_input: initialAttrs.diameter_input,
         };
-        if (diameter !== null && diameter > 0) {
-          attrs.diameter_mm = lengthToMm(diameter, prefs.length);
-          attrs.diameter_input = makeInput(diameterText.trim(), prefs.length);
-        }
         return attrs as Json;
       }
       case 'powder':
@@ -200,12 +191,6 @@ export function ComponentForm({
             unit={prefs.mass}
             value={weightText}
             onChangeText={setWeightText}
-          />
-          <UnitField
-            label={t.catalog.bulletDiameter}
-            unit={prefs.length}
-            value={diameterText}
-            onChangeText={setDiameterText}
           />
           <OptionChips
             label={t.catalog.bulletType}

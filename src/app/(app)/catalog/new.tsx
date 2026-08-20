@@ -28,7 +28,6 @@ import { newId } from '@/lib/ids';
 import { MANUFACTURERS } from '@/lib/manufacturers';
 import {
   UNIT_PRESETS,
-  lengthToMm,
   makeInput,
   massToMg,
   parseDecimal,
@@ -63,14 +62,12 @@ export default function NewComponentWizard() {
   const [caliber, setCaliber] = useState<string | null>(null);
   const [family, setFamily] = useState<string | null>(null);
   const [weightText, setWeightText] = useState('');
-  const [diameterText, setDiameterText] = useState('');
   const [bulletType, setBulletType] = useState<string | null>(null);
   const [burnClass, setBurnClass] = useState('');
   const [primerSize, setPrimerSize] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const weight = parseDecimal(weightText);
-  const diameter = parseDecimal(diameterText);
 
   const detailsValid =
     name.trim().length > 0 &&
@@ -89,10 +86,6 @@ export default function NewComponentWizard() {
           weight_input: makeInput(weightText.trim(), prefs.mass),
           bullet_type: bulletType ?? undefined,
         };
-        if (diameter !== null && diameter > 0) {
-          attrs.diameter_mm = lengthToMm(diameter, prefs.length);
-          attrs.diameter_input = makeInput(diameterText.trim(), prefs.length);
-        }
         return attrs as Json;
       }
       case 'powder':
@@ -228,12 +221,6 @@ export default function NewComponentWizard() {
                 unit={prefs.mass}
                 value={weightText}
                 onChangeText={setWeightText}
-              />
-              <UnitField
-                label={t.catalog.bulletDiameter}
-                unit={prefs.length}
-                value={diameterText}
-                onChangeText={setDiameterText}
               />
               <OptionChips
                 label={t.catalog.bulletType}
