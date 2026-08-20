@@ -1,4 +1,5 @@
 import type { Tables, TablesInsert, TablesUpdate } from '@/lib/database.types';
+import { familyForCartridge, familyLabel } from '@/lib/bulletFamilies';
 import { t } from '@/lib/i18n';
 import { supabase } from '@/lib/supabase';
 
@@ -7,6 +8,9 @@ export type ComponentType = 'bullet' | 'powder' | 'primer' | 'case';
 
 /** Typed views over the attrs jsonb column (docs/DATA_MODEL.md). */
 export interface BulletAttrs {
+  /** Bullet caliber family id (see bulletFamilies.ts). */
+  family?: string;
+  /** Legacy: cartridge name from before families existed (read-only fallback). */
   caliber?: string;
   weight_mg?: number;
   weight_input?: string;
@@ -85,7 +89,10 @@ export function componentDetailRows(
   switch (component.type as ComponentType) {
     case 'bullet':
       rows.push(
-        { label: t.catalog.caliber, value: attrs.caliber },
+        {
+          label: t.catalog.bulletFamily,
+          value: familyLabel(attrs.family ?? familyForCartridge(attrs.caliber)) ?? attrs.caliber,
+        },
         { label: t.catalog.bulletWeight, value: attrs.weight_input },
         { label: t.catalog.bulletDiameter, value: attrs.diameter_input },
         { label: t.catalog.bulletType, value: attrs.bullet_type?.toUpperCase() },
@@ -109,6 +116,13 @@ export function componentDetailRows(
   );
 }
 
+/** Family id of a bullet — attrs.family, or mapped from the legacy cartridge. */
+export function bulletFamilyOf(component: CatalogComponent): string | undefined {
+  if (component.type !== 'bullet') return undefined;
+  const attrs = component.attrs as BulletAttrs;
+  return attrs.family ?? familyForCartridge(attrs.caliber);
+}
+
 /** One-line attrs summary for list rows. */
 export function componentSummary(component: CatalogComponent): string {
   const attrs = component.attrs as BulletAttrs &
@@ -117,7 +131,11 @@ export function componentSummary(component: CatalogComponent): string {
     CaseAttrs;
   switch (component.type as ComponentType) {
     case 'bullet':
-      return [attrs.caliber, attrs.weight_input, attrs.bullet_type?.toUpperCase()]
+      return [
+        familyLabel(attrs.family ?? familyForCartridge(attrs.caliber)) ?? attrs.caliber,
+        attrs.weight_input,
+        attrs.bullet_type?.toUpperCase(),
+      ]
         .filter(Boolean)
         .join(' · ');
     case 'powder':

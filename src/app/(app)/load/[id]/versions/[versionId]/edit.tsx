@@ -13,13 +13,13 @@ import { listComponents } from '@/lib/componentCatalog';
 import { showErrorAlert } from '@/lib/errors';
 import { t } from '@/lib/i18n';
 import { listLots } from '@/lib/inventory';
-import { deleteVersion, updateVersion, type LoadVersion } from '@/lib/loads';
+import { deleteVersion, updateVersion, type Load, type LoadVersion } from '@/lib/loads';
 import { supabase } from '@/lib/supabase';
 import { useCachedQuery } from '@/lib/useCachedQuery';
 import { useIsOnline } from '@/lib/useIsOnline';
 
 export default function EditLoadVersion() {
-  const { versionId } = useLocalSearchParams<{ id: string; versionId: string }>();
+  const { id, versionId } = useLocalSearchParams<{ id: string; versionId: string }>();
   const isOnline = useIsOnline();
   const [submitting, setSubmitting] = useState(false);
 
@@ -33,6 +33,11 @@ export default function EditLoadVersion() {
     return data;
   });
   const components = useCachedQuery('components', listComponents);
+  const load = useCachedQuery<Load>(`load:${id}`, async () => {
+    const { data, error } = await supabase.from('loads').select('*').eq('id', id).single();
+    if (error) throw error;
+    return data;
+  });
   const lots = useCachedQuery('lots', listLots);
 
   async function handleSubmit(values: LoadVersionFormValues) {
@@ -89,6 +94,7 @@ export default function EditLoadVersion() {
   return (
     <LoadVersionForm
       initial={version.data}
+      loadCaliber={load.data?.caliber}
       isEdit
       components={components.data ?? []}
       lots={lots.data ?? []}

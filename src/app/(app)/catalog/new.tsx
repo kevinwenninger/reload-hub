@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { View } from 'react-native';
 
 import { CaliberPicker } from '@/components/CaliberPicker';
+import { SelectField } from '@/components/SelectField';
 import { FormField } from '@/components/FormField';
 import { OptionChips } from '@/components/OptionChips';
 import { UnitField } from '@/components/UnitField';
@@ -10,6 +11,7 @@ import { ChoiceCard } from '@/components/wizard/ChoiceCard';
 import { InlineSearchList } from '@/components/wizard/InlineSearchList';
 import { WizardScaffold } from '@/components/wizard/WizardScaffold';
 import { useAuth } from '@/lib/auth';
+import { BULLET_FAMILIES } from '@/lib/bulletFamilies';
 import {
   BULLET_TYPES,
   COMPONENT_TYPE_LABELS,
@@ -59,6 +61,7 @@ export default function NewComponentWizard() {
   const [manufacturer, setManufacturer] = useState<string | null>(null);
   const [name, setName] = useState('');
   const [caliber, setCaliber] = useState<string | null>(null);
+  const [family, setFamily] = useState<string | null>(null);
   const [weightText, setWeightText] = useState('');
   const [diameterText, setDiameterText] = useState('');
   const [bulletType, setBulletType] = useState<string | null>(null);
@@ -81,7 +84,7 @@ export default function NewComponentWizard() {
     switch (type!) {
       case 'bullet': {
         const attrs: BulletAttrs = {
-          caliber: caliber ?? undefined,
+          family: family ?? undefined,
           weight_mg: massToMg(weight!, prefs.mass),
           weight_input: makeInput(weightText.trim(), prefs.mass),
           bullet_type: bulletType ?? undefined,
@@ -212,10 +215,13 @@ export default function NewComponentWizard() {
           />
           {type === 'bullet' ? (
             <>
-              <CaliberPicker
-                label={t.catalog.caliber}
-                value={caliber}
-                onChange={setCaliber}
+              <SelectField
+                label={t.catalog.bulletFamily}
+                placeholder={t.catalog.bulletFamilyPlaceholder}
+                options={BULLET_FAMILIES.map((f) => ({ id: f.id, label: f.label }))}
+                value={family}
+                onChange={setFamily}
+                clearable
               />
               <UnitField
                 label={t.catalog.bulletWeight}

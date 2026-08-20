@@ -8,7 +8,13 @@ import { LoadDataDisclaimer } from '@/components/LoadDataDisclaimer';
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { UnitField } from '@/components/UnitField';
 import { useAuth } from '@/lib/auth';
-import type { CatalogComponent, ComponentType } from '@/lib/componentCatalog';
+import { familyForCartridge } from '@/lib/bulletFamilies';
+import {
+  bulletFamilyOf,
+  type CaseAttrs,
+  type CatalogComponent,
+  type ComponentType,
+} from '@/lib/componentCatalog';
 import { t } from '@/lib/i18n';
 import type { InventoryLot } from '@/lib/inventory';
 import type { CrimpType, LoadVersion } from '@/lib/loads';
@@ -50,6 +56,8 @@ export interface LoadVersionFormValues {
 interface LoadVersionFormProps {
   /** Prefill source: the version being edited or the latest version to copy. */
   initial?: LoadVersion;
+  /** The load's cartridge — filters bullet (family) and case (cartridge) slots. */
+  loadCaliber?: string;
   /** true = editing `initial` itself; false = new version copied from it. */
   isEdit?: boolean;
   components: CatalogComponent[];
@@ -81,6 +89,7 @@ function prefill(value: number | null, toUnit: (v: number) => number): string {
 
 export function LoadVersionForm({
   initial,
+  loadCaliber,
   isEdit = false,
   components,
   lots,
@@ -199,7 +208,22 @@ export function LoadVersionForm({
           <ComponentSlotPicker
             key={type}
             label={SECTION_LABELS[type]}
-            components={components.filter((c) => c.type === type)}
+            components={components.filter((c) => {
+              if (c.type !== type) return false;
+              // Bullets: match the cartridge's caliber family; keep bullets
+              // with unknown family visible (legacy/free-text data).
+              if (type === 'bullet') {
+                const wanted = familyForCartridge(loadCaliber);
+                const own = bulletFamilyOf(c);
+                return wanted === undefined || own === undefined || own === wanted;
+              }
+              // Cases are cartridge-specific.
+              if (type === 'case' && loadCaliber !== undefined) {
+                const own = (c.attrs as CaseAttrs).caliber;
+                return own === undefined || own === loadCaliber;
+              }
+              return true;
+            })}
             lots={lots}
             componentId={componentIds[type]}
             lotId={lotIds[type]}

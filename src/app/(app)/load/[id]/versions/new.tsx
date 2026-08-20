@@ -13,7 +13,8 @@ import { showErrorAlert } from '@/lib/errors';
 import { t } from '@/lib/i18n';
 import { newId } from '@/lib/ids';
 import { listLots } from '@/lib/inventory';
-import { insertVersion, listVersions } from '@/lib/loads';
+import { insertVersion, listVersions, type Load } from '@/lib/loads';
+import { supabase } from '@/lib/supabase';
 import { useCachedQuery } from '@/lib/useCachedQuery';
 
 export default function NewLoadVersion() {
@@ -25,6 +26,11 @@ export default function NewLoadVersion() {
   const components = useCachedQuery('components', listComponents);
   const lots = useCachedQuery('lots', listLots);
   const versions = useCachedQuery(`versions:${id}`, () => listVersions(id));
+  const load = useCachedQuery<Load>(`load:${id}`, async () => {
+    const { data, error } = await supabase.from('loads').select('*').eq('id', id).single();
+    if (error) throw error;
+    return data;
+  });
 
   if (components.loading || lots.loading || versions.loading) {
     return (
@@ -64,6 +70,7 @@ export default function NewLoadVersion() {
   return (
     <LoadVersionForm
       initial={latest}
+      loadCaliber={load.data?.caliber}
       components={components.data ?? []}
       lots={lots.data ?? []}
       submitLabel={`${t.common.save} v${nextNo}`}

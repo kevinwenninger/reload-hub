@@ -6,9 +6,11 @@ import { CaliberPicker } from '@/components/CaliberPicker';
 import { FormField } from '@/components/FormField';
 import { OptionChips } from '@/components/OptionChips';
 import { SegmentedControl } from '@/components/SegmentedControl';
+import { SelectField } from '@/components/SelectField';
 import { StringPicker } from '@/components/StringPicker';
 import { UnitField } from '@/components/UnitField';
 import { useAuth } from '@/lib/auth';
+import { BULLET_FAMILIES, familyForCartridge } from '@/lib/bulletFamilies';
 import {
   BULLET_TYPES,
   COMPONENT_TYPE_LABELS,
@@ -91,6 +93,9 @@ export function ComponentForm({
   const [caliber, setCaliber] = useState<string | null>(
     initialAttrs.caliber ?? null,
   );
+  const [family, setFamily] = useState<string | null>(
+    initialAttrs.family ?? familyForCartridge(initialAttrs.caliber) ?? null,
+  );
   const [weightText, setWeightText] = useState(
     initialAttrs.weight_mg === undefined
       ? ''
@@ -124,7 +129,7 @@ export function ComponentForm({
     switch (type) {
       case 'bullet': {
         const attrs: BulletAttrs = {
-          caliber: caliber ?? undefined,
+          family: family ?? undefined,
           weight_mg: massToMg(weight!, prefs.mass),
           weight_input: makeInput(weightText.trim(), prefs.mass),
           bullet_type: bulletType ?? undefined,
@@ -182,10 +187,13 @@ export function ComponentForm({
 
       {type === 'bullet' ? (
         <>
-          <CaliberPicker
-            label={t.catalog.caliber}
-            value={caliber}
-            onChange={setCaliber}
+          <SelectField
+            label={t.catalog.bulletFamily}
+            placeholder={t.catalog.bulletFamilyPlaceholder}
+            options={BULLET_FAMILIES.map((f) => ({ id: f.id, label: f.label }))}
+            value={family}
+            onChange={setFamily}
+            clearable
           />
           <UnitField
             label={t.catalog.bulletWeight}

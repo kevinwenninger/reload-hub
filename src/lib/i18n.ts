@@ -131,6 +131,8 @@ export const t = {
     namePlaceholder: 'e.g. MatchKing 168 gr HPBT',
     mpn: 'Manufacturer part number (optional)',
     mpnPlaceholder: 'e.g. 2200',
+    bulletFamily: 'Caliber family',
+    bulletFamilyPlaceholder: 'Select caliber family',
     bulletWeight: 'Bullet weight',
     bulletDiameter: 'Diameter (optional)',
     bulletType: 'Bullet type',
