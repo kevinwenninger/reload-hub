@@ -12,12 +12,20 @@ import { t } from '@/lib/i18n';
 import type { Load, LoadVersion } from '@/lib/loads';
 import {
   listShotsLocal,
+  sessionMalfunctions,
   signedPhotoUrls,
   type RangeSession,
   type ShotString,
 } from '@/lib/range';
 import { stringStats } from '@/lib/stats';
 import { UNIT_PRESETS, mpsToVelocity, UNIT_LABELS, type UnitPrefs } from '@/lib/units';
+
+const MALFUNCTION_LABELS: Record<string, string> = {
+  failure_to_fire: t.range.malfunction_failure_to_fire,
+  failure_to_feed: t.range.malfunction_failure_to_feed,
+  failure_to_eject: t.range.malfunction_failure_to_eject,
+  other: t.range.malfunction_other,
+};
 
 const FLAG_LABELS: Record<string, string> = {
   heavy_bolt_lift: t.range.pressure_heavy_bolt_lift,
@@ -172,11 +180,11 @@ export function SessionSummary({
         )}
       </View>
 
-      {session.group_size_input ? (
+      {(session.group_angle_input ?? session.group_size_input) ? (
         <View className="gap-1">
           <SectionTitle>{t.range.groupSize}</SectionTitle>
           <Text className="text-base font-semibold text-text">
-            {session.group_size_input}
+            {session.group_angle_input ?? session.group_size_input}
           </Text>
         </View>
       ) : null}
@@ -200,6 +208,17 @@ export function SessionSummary({
               </View>
             </ScrollView>
           )}
+        </View>
+      ) : null}
+
+      {Object.keys(sessionMalfunctions(session)).length > 0 ? (
+        <View className="gap-1">
+          <SectionTitle>{t.range.malfunctions}</SectionTitle>
+          {Object.entries(sessionMalfunctions(session)).map(([type, count]) => (
+            <Text key={type} className="text-sm text-text">
+              • {count}× {MALFUNCTION_LABELS[type] ?? type}
+            </Text>
+          ))}
         </View>
       ) : null}
 

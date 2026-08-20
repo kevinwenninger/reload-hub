@@ -13,9 +13,9 @@ import { newId } from '@/lib/ids';
 import { getSessionLocal, saveSession, type RangeSession } from '@/lib/range';
 import {
   UNIT_PRESETS,
-  lengthToMm,
+  angleToMoa,
   makeInput,
-  mmToLength,
+  moaToAngle,
   parseDecimal,
   type UnitPrefs,
 } from '@/lib/units';
@@ -32,16 +32,18 @@ export default function GroupEntry() {
   const [photoQueued, setPhotoQueued] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
+  const angleUnit = prefs.angle ?? 'moa';
+
   useEffect(() => {
     void getSessionLocal(id).then((loaded) => {
       setSession(loaded);
-      if (loaded?.group_size_mm != null) {
+      if (loaded?.group_angle_moa != null) {
         setGroupText(
-          Number(mmToLength(loaded.group_size_mm, prefs.length).toFixed(1)).toString(),
+          Number(moaToAngle(loaded.group_angle_moa, angleUnit).toFixed(2)).toString(),
         );
       }
     });
-  }, [id, prefs.length]);
+  }, [id, angleUnit]);
 
   async function queuePhoto(fromCamera: boolean) {
     if (!authSession) return;
@@ -76,12 +78,12 @@ export default function GroupEntry() {
     try {
       await saveSession({
         ...session,
-        group_size_mm:
-          group === null || group <= 0 ? null : lengthToMm(group, prefs.length),
-        group_size_input:
+        group_angle_moa:
+          group === null || group <= 0 ? null : angleToMoa(group, angleUnit),
+        group_angle_input:
           group === null || group <= 0
             ? null
-            : makeInput(groupText.trim(), prefs.length),
+            : makeInput(groupText.trim(), angleUnit),
         updated_at: new Date().toISOString(),
       });
       router.back();
@@ -99,10 +101,11 @@ export default function GroupEntry() {
     >
       <UnitField
         label={t.range.groupSize}
-        unit={prefs.length}
+        unit={angleUnit}
         value={groupText}
         onChangeText={setGroupText}
       />
+      <Text className="-mt-3 text-xs text-text-muted">{t.range.groupAngleHint}</Text>
       <Text className="text-sm font-medium text-text-muted">{t.range.photo}</Text>
       <Button
         label={t.range.takePhoto}

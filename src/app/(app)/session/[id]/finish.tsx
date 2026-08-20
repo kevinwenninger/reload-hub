@@ -4,17 +4,27 @@ import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 
 import { Button } from '@/components/Button';
+import { Stepper } from '@/components/Stepper';
 import { FormField } from '@/components/FormField';
 import { colors } from '@/lib/colors';
 import { showErrorAlert } from '@/lib/errors';
 import { t } from '@/lib/i18n';
 import {
+  MALFUNCTION_TYPES,
   PRESSURE_FLAGS,
   getSessionLocal,
+  sessionMalfunctions,
   saveSession,
   type RangeSession,
 } from '@/lib/range';
 import { supabase } from '@/lib/supabase';
+
+const MALFUNCTION_LABELS: Record<(typeof MALFUNCTION_TYPES)[number], string> = {
+  failure_to_fire: t.range.malfunction_failure_to_fire,
+  failure_to_feed: t.range.malfunction_failure_to_feed,
+  failure_to_eject: t.range.malfunction_failure_to_eject,
+  other: t.range.malfunction_other,
+};
 
 const FLAG_LABELS: Record<(typeof PRESSURE_FLAGS)[number], string> = {
   heavy_bolt_lift: t.range.pressure_heavy_bolt_lift,
@@ -30,6 +40,7 @@ export default function FinishSession() {
   const [rating, setRating] = useState<number | null>(null);
   const [flags, setFlags] = useState<string[]>([]);
   const [lessons, setLessons] = useState('');
+  const [malfunctions, setMalfunctions] = useState<Record<string, number>>({});
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -38,6 +49,7 @@ export default function FinishSession() {
       setRating(loaded?.rating ?? null);
       setFlags(loaded?.pressure_flags ?? []);
       setLessons(loaded?.lessons_learned ?? '');
+      setMalfunctions(loaded ? sessionMalfunctions(loaded) : {});
     });
   }, [id]);
 
@@ -55,6 +67,9 @@ export default function FinishSession() {
         ...session,
         rating,
         pressure_flags: flags,
+        malfunctions: Object.fromEntries(
+          Object.entries(malfunctions).filter(([, count]) => count > 0),
+        ),
         lessons_learned: lessons.trim() === '' ? null : lessons.trim(),
         updated_at: new Date().toISOString(),
       });
@@ -135,6 +150,31 @@ export default function FinishSession() {
               </Pressable>
             );
           })}
+        </View>
+      </View>
+
+      <View className="gap-1.5">
+        <Text className="text-sm font-medium text-text-muted">
+          {t.range.malfunctions}
+        </Text>
+        <Text className="text-xs text-text-muted">{t.range.malfunctionsHint}</Text>
+        <View className="gap-2">
+          {MALFUNCTION_TYPES.map((type) => (
+            <View
+              key={type}
+              className="min-h-12 flex-row items-center justify-between rounded-card border border-border bg-surface px-4 py-2"
+            >
+              <Text className="flex-1 pr-3 text-base text-text">
+                {MALFUNCTION_LABELS[type]}
+              </Text>
+              <Stepper
+                value={malfunctions[type] ?? 0}
+                min={0}
+                max={99}
+                onChange={(next) => setMalfunctions({ ...malfunctions, [type]: next })}
+              />
+            </View>
+          ))}
         </View>
       </View>
 

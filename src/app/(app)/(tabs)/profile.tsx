@@ -23,6 +23,7 @@ import { deleteOwnAccount, updateProfile } from '@/lib/profile';
 import { supabase } from '@/lib/supabase';
 import {
   UNIT_LABELS,
+  type AngleUnit,
   type DistanceUnit,
   type LengthUnit,
   type MassUnit,
@@ -32,12 +33,15 @@ import {
 } from '@/lib/units';
 import { useIsOnline } from '@/lib/useIsOnline';
 
-const OTHER_UNIT: { [K in keyof UnitPrefs]: Record<string, UnitPrefs[K]> } = {
+const OTHER_UNIT: {
+  [K in keyof Required<UnitPrefs>]-?: Record<string, Required<UnitPrefs>[K]>;
+} = {
   mass: { gr: 'g', g: 'gr' } as Record<string, MassUnit>,
   length: { mm: 'in', in: 'mm' } as Record<string, LengthUnit>,
   velocity: { mps: 'fps', fps: 'mps' } as Record<string, VelocityUnit>,
   distance: { m: 'yd', yd: 'm' } as Record<string, DistanceUnit>,
   temperature: { c: 'f', f: 'c' } as Record<string, TemperatureUnit>,
+  angle: { moa: 'mrad', mrad: 'moa' } as Record<string, AngleUnit>,
 };
 
 const UNIT_ROW_LABELS: Record<keyof UnitPrefs, string> = {
@@ -46,6 +50,7 @@ const UNIT_ROW_LABELS: Record<keyof UnitPrefs, string> = {
   velocity: t.profile.unitVelocity,
   distance: t.profile.unitDistance,
   temperature: t.profile.unitTemperature,
+  angle: t.profile.unitAngle,
 };
 
 export default function ProfileScreen() {
@@ -116,7 +121,8 @@ export default function ProfileScreen() {
   const prefs = merged.unit_prefs as unknown as UnitPrefs;
 
   function toggleUnit(quantity: keyof UnitPrefs) {
-    const next = { ...prefs, [quantity]: OTHER_UNIT[quantity][prefs[quantity]] };
+    const current = prefs[quantity] ?? 'moa';
+    const next = { ...prefs, [quantity]: OTHER_UNIT[quantity][current] };
     void patch({ unit_prefs: next as unknown as Profile['unit_prefs'] });
   }
 
@@ -166,7 +172,7 @@ export default function ProfileScreen() {
             <Text className="text-text-muted">{UNIT_ROW_LABELS[quantity]}</Text>
             <View className="flex-row items-center gap-2">
               <Text className="font-semibold text-text">
-                {UNIT_LABELS[prefs[quantity]]}
+                {UNIT_LABELS[prefs[quantity] ?? 'moa']}
               </Text>
               <MaterialCommunityIcons
                 name="swap-horizontal"

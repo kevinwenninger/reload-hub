@@ -105,7 +105,7 @@ export default function NewSession() {
   }
 
   const distance = parseDecimal(distanceText);
-  const valid = firearmId !== null && distance !== null && distance > 0;
+  const valid = firearmId !== null;
 
   async function handleStart() {
     if (!session || !valid) return;
@@ -123,8 +123,14 @@ export default function NewSession() {
           ammoKind === 'factory' && ammoNote.trim() !== '' ? ammoNote.trim() : null,
         date: now.slice(0, 10),
         location: location.trim() === '' ? null : location.trim(),
-        distance_m: distanceToM(distance!, prefs.distance),
-        distance_input: makeInput(distanceText.trim(), prefs.distance),
+        distance_m:
+          distance === null || distance <= 0
+            ? null
+            : distanceToM(distance, prefs.distance),
+        distance_input:
+          distance === null || distance <= 0
+            ? null
+            : makeInput(distanceText.trim(), prefs.distance),
         temperature_c:
           temperature === null ? null : temperatureToC(temperature, prefs.temperature),
         temperature_input:
@@ -136,6 +142,9 @@ export default function NewSession() {
         rounds_fired: 0,
         group_size_mm: null,
         group_size_input: null,
+        group_angle_moa: null,
+        group_angle_input: null,
+        malfunctions: {},
         rating: null,
         lessons_learned: null,
         pressure_flags: [],

@@ -12,12 +12,14 @@ export const MG_PER_GRAM = 1000;
 export const MM_PER_INCH = 25.4;
 export const MPS_PER_FPS = 0.3048;
 export const M_PER_YARD = 0.9144;
+export const MOA_PER_MRAD = 3.4377492368;
 
 export type MassUnit = 'gr' | 'g';
 export type LengthUnit = 'mm' | 'in';
 export type VelocityUnit = 'mps' | 'fps';
 export type DistanceUnit = 'm' | 'yd';
 export type TemperatureUnit = 'c' | 'f';
+export type AngleUnit = 'moa' | 'mrad';
 
 export interface UnitPrefs {
   mass: MassUnit;
@@ -25,6 +27,8 @@ export interface UnitPrefs {
   velocity: VelocityUnit;
   distance: DistanceUnit;
   temperature: TemperatureUnit;
+  /** Group size unit; optional because older profiles predate it. */
+  angle?: AngleUnit;
 }
 
 export const UNIT_PRESETS: Record<'metric_mixed' | 'us' | 'metric', UnitPrefs> =
@@ -36,6 +40,7 @@ export const UNIT_PRESETS: Record<'metric_mixed' | 'us' | 'metric', UnitPrefs> =
       velocity: 'mps',
       distance: 'm',
       temperature: 'c',
+      angle: 'moa',
     },
     us: {
       mass: 'gr',
@@ -43,6 +48,7 @@ export const UNIT_PRESETS: Record<'metric_mixed' | 'us' | 'metric', UnitPrefs> =
       velocity: 'fps',
       distance: 'yd',
       temperature: 'f',
+      angle: 'moa',
     },
     metric: {
       mass: 'g',
@@ -50,6 +56,7 @@ export const UNIT_PRESETS: Record<'metric_mixed' | 'us' | 'metric', UnitPrefs> =
       velocity: 'mps',
       distance: 'm',
       temperature: 'c',
+      angle: 'mrad',
     },
   };
 
@@ -75,6 +82,10 @@ export function temperatureToC(value: number, unit: TemperatureUnit): number {
   return unit === 'f' ? ((value - 32) * 5) / 9 : value;
 }
 
+export function angleToMoa(value: number, unit: AngleUnit): number {
+  return unit === 'mrad' ? value * MOA_PER_MRAD : value;
+}
+
 // --- from canonical ---
 
 export function mgToMass(mg: number, unit: MassUnit): number {
@@ -97,10 +108,14 @@ export function cToTemperature(c: number, unit: TemperatureUnit): number {
   return unit === 'f' ? (c * 9) / 5 + 32 : c;
 }
 
+export function moaToAngle(moa: number, unit: AngleUnit): number {
+  return unit === 'mrad' ? moa / MOA_PER_MRAD : moa;
+}
+
 // --- display ---
 
 export const UNIT_LABELS: Record<
-  MassUnit | LengthUnit | VelocityUnit | DistanceUnit | TemperatureUnit,
+  MassUnit | LengthUnit | VelocityUnit | DistanceUnit | TemperatureUnit | AngleUnit,
   string
 > = {
   gr: 'gr',
@@ -113,6 +128,8 @@ export const UNIT_LABELS: Record<
   yd: 'yd',
   c: '°C',
   f: '°F',
+  moa: 'MOA',
+  mrad: 'MRAD',
 };
 
 const DEFAULT_DECIMALS: Record<string, number> = {
@@ -126,6 +143,8 @@ const DEFAULT_DECIMALS: Record<string, number> = {
   yd: 0,
   c: 0,
   f: 0,
+  moa: 2,
+  mrad: 2,
 };
 
 function formatValue(value: number, unit: string, decimals?: number): string {

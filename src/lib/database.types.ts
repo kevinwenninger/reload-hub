@@ -573,12 +573,15 @@ export type Database = {
           distance_input: string | null
           distance_m: number | null
           firearm_id: string
+          group_angle_input: string | null
+          group_angle_moa: number | null
           group_size_input: string | null
           group_size_mm: number | null
           id: string
           lessons_learned: string | null
           load_version_id: string | null
           location: string | null
+          malfunctions: Json
           photos: string[]
           pressure_flags: string[]
           rating: number | null
@@ -597,12 +600,15 @@ export type Database = {
           distance_input?: string | null
           distance_m?: number | null
           firearm_id: string
+          group_angle_input?: string | null
+          group_angle_moa?: number | null
           group_size_input?: string | null
           group_size_mm?: number | null
           id?: string
           lessons_learned?: string | null
           load_version_id?: string | null
           location?: string | null
+          malfunctions?: Json
           photos?: string[]
           pressure_flags?: string[]
           rating?: number | null
@@ -621,12 +627,15 @@ export type Database = {
           distance_input?: string | null
           distance_m?: number | null
           firearm_id?: string
+          group_angle_input?: string | null
+          group_angle_moa?: number | null
           group_size_input?: string | null
           group_size_mm?: number | null
           id?: string
           lessons_learned?: string | null
           load_version_id?: string | null
           location?: string | null
+          malfunctions?: Json
           photos?: string[]
           pressure_flags?: string[]
           rating?: number | null

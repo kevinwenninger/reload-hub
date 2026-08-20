@@ -13,6 +13,22 @@ export type RangeSession = Tables<'range_sessions'>;
 export type ShotString = Tables<'shot_strings'>;
 export type Shot = Tables<'shots'>;
 
+export const MALFUNCTION_TYPES = [
+  'failure_to_fire',
+  'failure_to_feed',
+  'failure_to_eject',
+  'other',
+] as const;
+export type MalfunctionCounts = Record<string, number>;
+
+export function sessionMalfunctions(session: RangeSession): MalfunctionCounts {
+  return (session.malfunctions as unknown as MalfunctionCounts) ?? {};
+}
+
+export function totalMalfunctions(session: RangeSession): number {
+  return Object.values(sessionMalfunctions(session)).reduce((a, b) => a + b, 0);
+}
+
 export const PRESSURE_FLAGS = [
   'heavy_bolt_lift',
   'flattened_primer',
@@ -111,6 +127,31 @@ export async function listSessionsMerged(): Promise<RangeSession[]> {
     if (cached !== null) localOnly.push(cached);
   }
   return [...localOnly, ...server];
+}
+
+/** Overall velocity numbers per session (all strings pooled), server-side. */
+export async function velocitiesBySession(
+  sessionIds: string[],
+): Promise<Record<string, number[]>> {
+  if (sessionIds.length === 0) return {};
+  const { data: strings, error } = await supabase
+    .from('shot_strings')
+    .select('id, session_id')
+    .in('session_id', sessionIds);
+  if (error) throw error;
+  if (strings.length === 0) return {};
+  const { data: shots, error: shotsError } = await supabase
+    .from('shots')
+    .select('string_id, velocity_mps')
+    .in('string_id', strings.map((s) => s.id));
+  if (shotsError) throw shotsError;
+  const bySession: Record<string, number[]> = {};
+  for (const shot of shots) {
+    const sessionId = strings.find((s) => s.id === shot.string_id)?.session_id;
+    if (!sessionId) continue;
+    (bySession[sessionId] ??= []).push(shot.velocity_mps);
+  }
+  return bySession;
 }
 
 /** Sessions that tested a given load version (server; used for range results). */

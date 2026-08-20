@@ -17,7 +17,13 @@ import { listLots } from '@/lib/inventory';
 import { formatRating, summarizeVersions } from '@/lib/loadDevelopment';
 import { setFavoriteVersion, type Load, type LoadVersion } from '@/lib/loads';
 import { costForVersion, roundsPossible, versionRows } from '@/lib/loadVersionDisplay';
-import { listSessionsForVersion } from '@/lib/range';
+import { stringStats } from '@/lib/stats';
+import { UNIT_LABELS, UNIT_PRESETS, mpsToVelocity, type UnitPrefs } from '@/lib/units';
+import {
+  listSessionsForVersion,
+  totalMalfunctions,
+  velocitiesBySession,
+} from '@/lib/range';
 import { supabase } from '@/lib/supabase';
 import { useCachedQuery } from '@/lib/useCachedQuery';
 import { useIsOnline } from '@/lib/useIsOnline';
@@ -36,6 +42,8 @@ function SectionTitle({ children }: { children: string }) {
 export default function LoadVersionDetail() {
   const { id, versionId } = useLocalSearchParams<{ id: string; versionId: string }>();
   const { profile } = useAuth();
+  const prefs =
+    (profile?.unit_prefs as unknown as UnitPrefs) ?? UNIT_PRESETS.metric_mixed;
   const isOnline = useIsOnline();
   const [costOpen, setCostOpen] = useState(false);
 
@@ -52,6 +60,11 @@ export default function LoadVersionDetail() {
   const lots = useCachedQuery('lots', listLots);
   const sessions = useCachedQuery(`versionSessions:${versionId}`, () =>
     listSessionsForVersion(versionId),
+  );
+  const sessionIds = (sessions.data ?? []).map((s) => s.id);
+  const velocities = useCachedQuery(
+    sessionIds.length === 0 ? null : `versionVelocities:${versionId}:${sessionIds.length}`,
+    () => velocitiesBySession(sessionIds),
   );
   const batches = useCachedQuery(`versionBatches:${versionId}`, () =>
     listBatchesForVersion(versionId),
@@ -287,40 +300,60 @@ export default function LoadVersionDetail() {
           <Text className="text-sm text-text-muted">{t.loads.noRangeResults}</Text>
         ) : (
           <View className="gap-2">
-            {sessions.data.map((session) => (
-              <Link key={session.id} href={`/(app)/session/${session.id}`} asChild>
-                <Pressable
-                  accessibilityRole="button"
-                  className="flex-row items-center justify-between rounded-card border border-border bg-surface p-4 active:opacity-70"
-                >
-                  <View className="flex-1 gap-0.5 pr-2">
-                    <Text className="text-sm font-medium text-text">
-                      {session.date}
-                      {session.location ? ` · ${session.location}` : ''}
-                    </Text>
+            {sessions.data.map((session) => {
+              const stats = stringStats(velocities.data?.[session.id] ?? []);
+              const show = (mps: number | null, decimals = 0) =>
+                mps === null ? null : mpsToVelocity(mps, prefs.velocity).toFixed(decimals);
+              const malfunctionCount = totalMalfunctions(session);
+              const quality = [
+                session.group_angle_input ?? session.group_size_input,
+                stats.avg !== null
+                  ? `${t.range.velocity_avg} ${show(stats.avg)} ${UNIT_LABELS[prefs.velocity]}`
+                  : null,
+                stats.sd !== null ? `${t.range.velocity_sd} ${show(stats.sd, 1)}` : null,
+                stats.es !== null && stats.n >= 2
+                  ? `${t.range.velocity_es} ${show(stats.es)}`
+                  : null,
+              ]
+                .filter(Boolean)
+                .join(' · ');
+              return (
+                <Link key={session.id} href={`/(app)/session/${session.id}`} asChild>
+                  <Pressable
+                    accessibilityRole="button"
+                    className="gap-1 rounded-card border border-border bg-surface p-4 active:opacity-70"
+                  >
+                    <View className="flex-row items-center justify-between">
+                      <Text className="text-sm font-medium text-text">
+                        {session.date}
+                        {session.location ? ` · ${session.location}` : ''}
+                      </Text>
+                      {session.rating !== null ? (
+                        <View className="flex-row items-center gap-0.5">
+                          <Text className="text-sm font-semibold text-text">
+                            {session.rating}
+                          </Text>
+                          <MaterialCommunityIcons name="star" size={16} color={colors.primary} />
+                        </View>
+                      ) : null}
+                    </View>
+                    {quality !== '' ? (
+                      <Text className="text-xs font-medium text-text">{quality}</Text>
+                    ) : null}
                     <Text className="text-xs text-text-muted">
                       {[
-                        session.distance_input,
-                        session.group_size_input
-                          ? `${session.group_size_input} ${t.loads.groupShort}`
-                          : null,
                         `${session.rounds_fired} ${t.firearms.rounds}`,
+                        malfunctionCount > 0
+                          ? `${malfunctionCount} ${t.range.malfunctions.toLowerCase()}`
+                          : null,
                       ]
                         .filter(Boolean)
                         .join(' · ')}
                     </Text>
-                  </View>
-                  {session.rating !== null ? (
-                    <View className="flex-row items-center gap-0.5">
-                      <Text className="text-sm font-semibold text-text">
-                        {session.rating}
-                      </Text>
-                      <MaterialCommunityIcons name="star" size={16} color={colors.primary} />
-                    </View>
-                  ) : null}
-                </Pressable>
-              </Link>
-            ))}
+                  </Pressable>
+                </Link>
+              );
+            })}
           </View>
         )}
         <Button
