@@ -146,9 +146,16 @@ export default function LoadVersionDetail() {
 
   const data = version.data;
   const summary = summarizeVersions([data], sessions.data ?? [])[0];
-  const rows = versionRows(data, components.data ?? [], lots.data ?? []).filter(
-    (row) => row.value !== '—',
-  );
+  const rows = versionRows(data, components.data ?? [], lots.data ?? [])
+    .filter((row) => row.value !== '—')
+    .map((row) =>
+      isLadder && row.label === t.loads.charge && data.charge_end_input
+        ? {
+            label: t.loads.charge,
+            value: `${data.charge_input} – ${data.charge_end_input}${data.charge_step_input ? ` · ${data.charge_step_input}` : ''}`,
+          }
+        : row,
+    );
   const stock = roundsPossible(data, lots.data ?? []);
   const cost = costForVersion(
     data,
@@ -336,6 +343,31 @@ export default function LoadVersionDetail() {
               })}
             </View>
           )}
+          {(sessions.data ?? []).map((session) => (
+            <Link key={session.id} href={`/(app)/session/${session.id}`} asChild>
+              <Pressable
+                accessibilityRole="button"
+                className="flex-row items-center justify-between rounded-card border border-border bg-surface px-4 py-3 active:opacity-70"
+              >
+                <Text className="text-sm text-text">
+                  {session.date}
+                  {session.location ? ` · ${session.location}` : ''}
+                </Text>
+                <View className="flex-row items-center gap-2">
+                  <Text className="text-xs text-text-muted">
+                    {session.rounds_fired} {t.firearms.rounds}
+                  </Text>
+                  <MaterialCommunityIcons name="chevron-right" size={18} color={colors.textMuted} />
+                </View>
+              </Pressable>
+            </Link>
+          ))}
+          <Button
+            label={t.loads.testAtRange}
+            onPress={() =>
+              router.push({ pathname: '/(app)/session/new', params: { versionId } })
+            }
+          />
         </View>
       ) : null}
 
@@ -373,6 +405,7 @@ export default function LoadVersionDetail() {
         )}
       </View>
 
+      {isLadder ? null : (
       <View className="gap-3">
         <SectionTitle>{t.loads.rangeResults}</SectionTitle>
         {sessions.data === null || sessions.data.length === 0 ? (
@@ -442,7 +475,9 @@ export default function LoadVersionDetail() {
           }
         />
       </View>
+      )}
 
+      {isLadder ? null : (
       <View className="gap-3">
         <Button
           label={t.loads.nextVersion}
@@ -468,6 +503,7 @@ export default function LoadVersionDetail() {
         </Pressable>
         )}
       </View>
+      )}
     </ScrollView>
   );
 }
