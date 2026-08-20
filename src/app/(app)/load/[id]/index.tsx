@@ -1,8 +1,9 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Link, Stack, router, useFocusEffect, useLocalSearchParams } from 'expo-router';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View } from 'react-native';
 
+import { ActionMenu } from '@/components/ActionMenu';
 import { Button } from '@/components/Button';
 import { ErrorState } from '@/components/ErrorState';
 import { LoadDataDisclaimer } from '@/components/LoadDataDisclaimer';
@@ -102,6 +103,7 @@ function VersionCard({
 export default function LoadDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const isOnline = useIsOnline();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const load = useCachedQuery<Load>(`load:${id}`, async () => {
     const { data, error } = await supabase.from('loads').select('*').eq('id', id).single();
@@ -156,20 +158,6 @@ export default function LoadDetail() {
     ]);
   }
 
-  function openMenu() {
-    const buttons = [];
-    if (load.data !== null && load.data.status !== 'retired') {
-      buttons.push({ text: t.loads.statusRetired, onPress: () => void retire() });
-    }
-    buttons.push({
-      text: t.common.delete,
-      style: 'destructive' as const,
-      onPress: confirmDelete,
-    });
-    buttons.push({ text: t.common.cancel, style: 'cancel' as const });
-    Alert.alert(load.data?.name ?? '', undefined, buttons);
-  }
-
   if (load.loading) {
     return (
       <View className="flex-1 items-center justify-center">
@@ -200,7 +188,7 @@ export default function LoadDetail() {
           headerRight: () => (
             <Pressable
               accessibilityRole="button"
-              onPress={openMenu}
+              onPress={() => setMenuOpen(true)}
               hitSlop={10}
               className="h-10 w-10 items-center justify-center"
             >
@@ -285,6 +273,28 @@ export default function LoadDetail() {
       )}
 
     </ScrollView>
+    <ActionMenu
+      visible={menuOpen}
+      title={data.name}
+      onClose={() => setMenuOpen(false)}
+      items={[
+        ...(status !== 'retired'
+          ? [
+              {
+                label: t.loads.statusRetired,
+                icon: 'archive-outline' as const,
+                onPress: () => void retire(),
+              },
+            ]
+          : []),
+        {
+          label: t.common.delete,
+          icon: 'trash-can-outline' as const,
+          destructive: true,
+          onPress: confirmDelete,
+        },
+      ]}
+    />
     </>
   );
 }
