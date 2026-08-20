@@ -160,22 +160,14 @@ export default function NewLoadWizard() {
           onNext={() => setStep(3)}
         >
           <View className="gap-3">
-            {Array.from({ length: Math.ceil(LOAD_PURPOSES.length / 2) }, (_, row) => (
-              <View key={row} className="flex-row gap-3">
-                {LOAD_PURPOSES.slice(row * 2, row * 2 + 2).map((purpose) => (
-                  <ChoiceCard
-                    key={purpose}
-                    half
-                    icon={PURPOSE_META[purpose].icon}
-                    label={PURPOSE_META[purpose].label}
-                    selected={purposes.includes(purpose)}
-                    onPress={() => togglePurpose(purpose)}
-                  />
-                ))}
-                {LOAD_PURPOSES.slice(row * 2, row * 2 + 2).length === 1 ? (
-                  <View className="flex-1" />
-                ) : null}
-              </View>
+            {LOAD_PURPOSES.map((purpose) => (
+              <ChoiceCard
+                key={purpose}
+                icon={PURPOSE_META[purpose].icon}
+                label={PURPOSE_META[purpose].label}
+                selected={purposes.includes(purpose)}
+                onPress={() => togglePurpose(purpose)}
+              />
             ))}
           </View>
         </WizardScaffold>
