@@ -1,5 +1,5 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Link, router, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { Link, Stack, router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useCallback } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View } from 'react-native';
 
@@ -156,6 +156,20 @@ export default function LoadDetail() {
     ]);
   }
 
+  function openMenu() {
+    const buttons = [];
+    if (load.data !== null && load.data.status !== 'retired') {
+      buttons.push({ text: t.loads.statusRetired, onPress: () => void retire() });
+    }
+    buttons.push({
+      text: t.common.delete,
+      style: 'destructive' as const,
+      onPress: confirmDelete,
+    });
+    buttons.push({ text: t.common.cancel, style: 'cancel' as const });
+    Alert.alert(load.data?.name ?? '', undefined, buttons);
+  }
+
   if (load.loading) {
     return (
       <View className="flex-1 items-center justify-center">
@@ -180,6 +194,21 @@ export default function LoadDetail() {
   const status = data.status as LoadStatus;
 
   return (
+    <>
+      <Stack.Screen
+        options={{
+          headerRight: () => (
+            <Pressable
+              accessibilityRole="button"
+              onPress={openMenu}
+              hitSlop={10}
+              className="h-10 w-10 items-center justify-center"
+            >
+              <MaterialCommunityIcons name="dots-horizontal" size={24} color={colors.text} />
+            </Pressable>
+          ),
+        }}
+      />
     <ScrollView contentContainerClassName="gap-5 p-6">
       <View className="gap-1">
         <View className="flex-row items-center gap-2">
@@ -255,10 +284,7 @@ export default function LoadDetail() {
         </>
       )}
 
-      {status !== 'retired' ? (
-        <Button label={t.loads.statusRetired} onPress={() => void retire()} variant="secondary" />
-      ) : null}
-      <Button label={t.common.delete} onPress={confirmDelete} variant="danger" />
     </ScrollView>
+    </>
   );
 }
