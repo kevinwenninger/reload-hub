@@ -1,66 +1,50 @@
-import { router } from 'expo-router';
+import { Stack, router } from 'expo-router';
 import { useState } from 'react';
-import { ScrollView, Text } from 'react-native';
+import { View } from 'react-native';
 
-import { Button } from '@/components/Button';
-import { CaliberPicker } from '@/components/CaliberPicker';
 import { FormField } from '@/components/FormField';
-import { OptionChips } from '@/components/OptionChips';
-import { SelectField } from '@/components/SelectField';
+import { ChoiceCard } from '@/components/wizard/ChoiceCard';
+import { InlineSearchList } from '@/components/wizard/InlineSearchList';
+import { WizardScaffold } from '@/components/wizard/WizardScaffold';
 import { useAuth } from '@/lib/auth';
+import { CALIBERS } from '@/lib/calibers';
 import { showErrorAlert } from '@/lib/errors';
-import { listFirearms } from '@/lib/firearms';
+import { listFirearms, type FirearmType } from '@/lib/firearms';
 import { t } from '@/lib/i18n';
 import { newId } from '@/lib/ids';
 import { insertLoad } from '@/lib/loads';
 import { useCachedQuery } from '@/lib/useCachedQuery';
 
+const TYPE_ICONS: Record<FirearmType, 'crosshairs' | 'pistol'> = {
+  rifle: 'crosshairs',
+  pistol: 'pistol',
+  revolver: 'pistol',
+};
+
 /**
- * A load is defined by its cartridge (caliber required); the firearm is
- * optional context. Picking a firearm narrows the caliber to what it shoots
- * (.357 Magnum revolver → .357 Magnum or .38 Special — the load itself names
- * exactly one); picking a caliber first narrows the firearm list to matches.
+ * Komoot-style wizard. The cartridge defines the recipe (step 1, required);
+ * the firearm is optional context (step 2); name last.
  */
-export default function NewLoad() {
+export default function NewLoadWizard() {
   const { session } = useAuth();
-  const [submitting, setSubmitting] = useState(false);
-  const [name, setName] = useState('');
-  const [firearmId, setFirearmId] = useState<string | null>(null);
+  const [step, setStep] = useState(0);
   const [caliber, setCaliber] = useState<string | null>(null);
+  const [firearmId, setFirearmId] = useState<string | null>(null);
+  const [firearmChosen, setFirearmChosen] = useState(false);
+  const [name, setName] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   const { data: firearms } = useCachedQuery('firearms', listFirearms);
 
-  const firearm = firearms?.find((f) => f.id === firearmId) ?? null;
-  const firearmCalibers =
-    firearm === null ? [] : [firearm.caliber, ...firearm.secondary_calibers];
+  // Only firearms chambered for the chosen cartridge.
+  const matching = (firearms ?? []).filter(
+    (f) =>
+      caliber !== null &&
+      (f.caliber === caliber || f.secondary_calibers.includes(caliber)),
+  );
 
-  // Firearm chosen → caliber must be one of its cartridges.
-  const effectiveCaliber =
-    firearm === null
-      ? caliber
-      : caliber !== null && firearmCalibers.includes(caliber)
-        ? caliber
-        : (firearmCalibers[0] ?? null);
-
-  // Caliber chosen (no firearm yet) → only offer firearms that shoot it.
-  const firearmOptions = (firearms ?? [])
-    .filter(
-      (f) =>
-        caliber === null ||
-        firearm !== null ||
-        f.caliber === caliber ||
-        f.secondary_calibers.includes(caliber),
-    )
-    .map((f) => ({
-      id: f.id,
-      label: f.name,
-      sublabel: [f.caliber, ...f.secondary_calibers].join(' · '),
-    }));
-
-  const valid = name.trim().length > 0 && effectiveCaliber !== null;
-
-  async function handleSubmit() {
-    if (!session || !valid) return;
+  async function handleSave() {
+    if (!session || caliber === null || name.trim().length === 0) return;
     setSubmitting(true);
     try {
       const id = newId();
@@ -68,7 +52,7 @@ export default function NewLoad() {
         id,
         user_id: session.user.id,
         firearm_id: firearmId,
-        caliber: effectiveCaliber!,
+        caliber,
         name: name.trim(),
       });
       router.replace(`/(app)/load/${id}`);
@@ -79,55 +63,86 @@ export default function NewLoad() {
     }
   }
 
+  if (step === 0) {
+    return (
+      <>
+        <Stack.Screen options={{ title: '' }} />
+        <WizardScaffold
+          title={t.wizard.loadCaliber}
+          subtitle={t.wizard.loadCaliberSub}
+          step={0}
+          totalSteps={3}
+          ctaDisabled={caliber === null}
+          onNext={() => setStep(matching.length === 0 && (firearms ?? []).length === 0 ? 2 : 1)}
+          scroll={false}
+        >
+          <InlineSearchList options={CALIBERS} value={caliber} onChange={setCaliber} />
+        </WizardScaffold>
+      </>
+    );
+  }
+
+  if (step === 1) {
+    return (
+      <>
+        <Stack.Screen options={{ title: caliber ?? '' }} />
+        <WizardScaffold
+          title={t.wizard.loadFirearm}
+          subtitle={t.wizard.loadFirearmSub}
+          step={1}
+          totalSteps={3}
+          ctaDisabled={!firearmChosen}
+          onNext={() => setStep(2)}
+        >
+          <View className="gap-3">
+            <ChoiceCard
+              icon="target"
+              label={t.wizard.noFirearm}
+              selected={firearmChosen && firearmId === null}
+              onPress={() => {
+                setFirearmId(null);
+                setFirearmChosen(true);
+              }}
+            />
+            {matching.map((firearm) => (
+              <ChoiceCard
+                key={firearm.id}
+                icon={TYPE_ICONS[firearm.type as FirearmType]}
+                label={firearm.name}
+                sublabel={[firearm.caliber, ...firearm.secondary_calibers].join(' · ')}
+                selected={firearmId === firearm.id}
+                onPress={() => {
+                  setFirearmId(firearm.id);
+                  setFirearmChosen(true);
+                }}
+              />
+            ))}
+          </View>
+        </WizardScaffold>
+      </>
+    );
+  }
+
   return (
-    <ScrollView
-      contentContainerClassName="gap-5 p-6"
-      keyboardShouldPersistTaps="handled"
-    >
-      <FormField
-        label={t.loads.name}
-        placeholder={t.loads.namePlaceholder}
-        value={name}
-        onChangeText={setName}
-      />
-
-      {firearm !== null && firearmCalibers.length > 1 ? (
-        <OptionChips
-          label={t.loads.caliber}
-          options={firearmCalibers.map((value) => ({ value, label: value }))}
-          value={effectiveCaliber}
-          onChange={setCaliber}
+    <>
+      <Stack.Screen options={{ title: caliber ?? '' }} />
+      <WizardScaffold
+        title={t.wizard.loadName}
+        subtitle={t.wizard.loadNameSub}
+        step={2}
+        totalSteps={3}
+        ctaLabel={t.wizard.save}
+        ctaDisabled={name.trim().length === 0 || submitting}
+        onNext={() => void handleSave()}
+      >
+        <FormField
+          label={t.loads.name}
+          placeholder={t.loads.namePlaceholder}
+          value={name}
+          onChangeText={setName}
+          autoFocus
         />
-      ) : firearm !== null ? (
-        <>
-          <Text className="text-sm font-medium text-text-muted">
-            {t.loads.caliber}
-          </Text>
-          <Text className="-mt-3 text-base text-text">{effectiveCaliber}</Text>
-        </>
-      ) : (
-        <CaliberPicker
-          label={t.loads.caliber}
-          value={caliber}
-          onChange={setCaliber}
-        />
-      )}
-
-      <SelectField
-        label={t.loads.firearmOptional}
-        placeholder={t.loads.firearmPlaceholder}
-        options={firearmOptions}
-        value={firearmId}
-        onChange={setFirearmId}
-        clearable
-      />
-
-      <Button
-        label={t.common.save}
-        onPress={() => void handleSubmit()}
-        loading={submitting}
-        disabled={!valid}
-      />
-    </ScrollView>
+      </WizardScaffold>
+    </>
   );
 }
