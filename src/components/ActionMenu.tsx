@@ -1,5 +1,6 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Modal, Pressable, Text, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Animated, Modal, Pressable, Text, View } from 'react-native';
 
 import { colors } from '@/lib/colors';
 import { t } from '@/lib/i18n';
@@ -20,11 +21,26 @@ interface ActionMenuProps {
 
 /** Styled bottom-sheet menu for header overflow actions. */
 export function ActionMenu({ visible, title, items, onClose }: ActionMenuProps) {
+  // Backdrop fades (Modal), only the sheet itself slides up.
+  const [translateY] = useState(() => new Animated.Value(320));
+  useEffect(() => {
+    if (visible) {
+      translateY.setValue(320);
+      Animated.spring(translateY, {
+        toValue: 0,
+        useNativeDriver: true,
+        damping: 22,
+        stiffness: 220,
+        mass: 0.8,
+      }).start();
+    }
+  }, [visible, translateY]);
+
   return (
     <Modal
       visible={visible}
       transparent
-      animationType="slide"
+      animationType="fade"
       onRequestClose={onClose}
     >
       {/* Backdrop */}
@@ -34,7 +50,10 @@ export function ActionMenu({ visible, title, items, onClose }: ActionMenuProps) 
         onPress={onClose}
         className="flex-1 bg-ink/40"
       />
-      <View className="rounded-t-[28px] bg-background px-6 pb-10 pt-3">
+      <Animated.View
+        style={{ transform: [{ translateY }] }}
+        className="rounded-t-[28px] bg-background px-6 pb-10 pt-3"
+      >
         <View className="mb-4 h-1.5 w-12 self-center rounded-pill bg-border-strong" />
         {title ? (
           <Text className="mb-3 font-display text-xl text-ink" numberOfLines={1}>
@@ -77,7 +96,7 @@ export function ActionMenu({ visible, title, items, onClose }: ActionMenuProps) 
             {t.common.cancel}
           </Text>
         </Pressable>
-      </View>
+      </Animated.View>
     </Modal>
   );
 }
