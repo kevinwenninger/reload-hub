@@ -6,6 +6,18 @@ export type LoadVersion = Tables<'load_versions'>;
 export type LoadStatus = 'development' | 'proven' | 'retired';
 export type CrimpType = 'none' | 'roll' | 'taper';
 
+export const LOAD_PURPOSES = [
+  'precision',
+  'low_recoil',
+  'long_range',
+  'competition',
+  'hunting',
+  'training',
+  'subsonic',
+  'economy',
+] as const;
+export type LoadPurpose = (typeof LOAD_PURPOSES)[number];
+
 export async function listLoads(): Promise<Load[]> {
   const { data, error } = await supabase
     .from('loads')

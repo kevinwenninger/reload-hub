@@ -1,6 +1,7 @@
 import { Stack, router } from 'expo-router';
 import { useState } from 'react';
 import { View } from 'react-native';
+import type { MaterialCommunityIcons } from '@expo/vector-icons';
 
 import { FormField } from '@/components/FormField';
 import { ChoiceCard } from '@/components/wizard/ChoiceCard';
@@ -12,13 +13,27 @@ import { showErrorAlert } from '@/lib/errors';
 import { listFirearms, type FirearmType } from '@/lib/firearms';
 import { t } from '@/lib/i18n';
 import { newId } from '@/lib/ids';
-import { insertLoad } from '@/lib/loads';
+import { LOAD_PURPOSES, insertLoad, type LoadPurpose } from '@/lib/loads';
 import { useCachedQuery } from '@/lib/useCachedQuery';
 
 const TYPE_ICONS: Record<FirearmType, 'crosshairs' | 'pistol'> = {
   rifle: 'crosshairs',
   pistol: 'pistol',
   revolver: 'pistol',
+};
+
+const PURPOSE_META: Record<
+  LoadPurpose,
+  { icon: keyof typeof MaterialCommunityIcons.glyphMap; label: string }
+> = {
+  precision: { icon: 'target', label: t.loads.purpose_precision },
+  low_recoil: { icon: 'feather', label: t.loads.purpose_low_recoil },
+  long_range: { icon: 'map-marker-distance', label: t.loads.purpose_long_range },
+  competition: { icon: 'trophy', label: t.loads.purpose_competition },
+  hunting: { icon: 'pine-tree', label: t.loads.purpose_hunting },
+  training: { icon: 'school', label: t.loads.purpose_training },
+  subsonic: { icon: 'volume-off', label: t.loads.purpose_subsonic },
+  economy: { icon: 'currency-usd', label: t.loads.purpose_economy },
 };
 
 /**
@@ -31,6 +46,7 @@ export default function NewLoadWizard() {
   const [caliber, setCaliber] = useState<string | null>(null);
   const [firearmId, setFirearmId] = useState<string | null>(null);
   const [firearmChosen, setFirearmChosen] = useState(false);
+  const [purposes, setPurposes] = useState<LoadPurpose[]>([]);
   const [name, setName] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
@@ -43,6 +59,14 @@ export default function NewLoadWizard() {
       (f.caliber === caliber || f.secondary_calibers.includes(caliber)),
   );
 
+  function togglePurpose(purpose: LoadPurpose) {
+    setPurposes(
+      purposes.includes(purpose)
+        ? purposes.filter((p) => p !== purpose)
+        : [...purposes, purpose],
+    );
+  }
+
   async function handleSave() {
     if (!session || caliber === null || name.trim().length === 0) return;
     setSubmitting(true);
@@ -54,6 +78,7 @@ export default function NewLoadWizard() {
         firearm_id: firearmId,
         caliber,
         name: name.trim(),
+        purpose: purposes,
       });
       router.replace(`/(app)/load/${id}`);
     } catch (e) {
@@ -71,7 +96,7 @@ export default function NewLoadWizard() {
           title={t.wizard.loadCaliber}
           subtitle={t.wizard.loadCaliberSub}
           step={0}
-          totalSteps={3}
+          totalSteps={4}
           ctaDisabled={caliber === null}
           onNext={() => setStep(matching.length === 0 && (firearms ?? []).length === 0 ? 2 : 1)}
           scroll={false}
@@ -90,7 +115,7 @@ export default function NewLoadWizard() {
           title={t.wizard.loadFirearm}
           subtitle={t.wizard.loadFirearmSub}
           step={1}
-          totalSteps={3}
+          totalSteps={4}
           ctaDisabled={!firearmChosen}
           onNext={() => setStep(2)}
         >
@@ -123,14 +148,49 @@ export default function NewLoadWizard() {
     );
   }
 
+  if (step === 2) {
+    return (
+      <>
+        <Stack.Screen options={{ title: caliber ?? '' }} />
+        <WizardScaffold
+          title={t.wizard.loadPurpose}
+          subtitle={t.wizard.loadPurposeSub}
+          step={2}
+          totalSteps={4}
+          onNext={() => setStep(3)}
+        >
+          <View className="gap-3">
+            {Array.from({ length: Math.ceil(LOAD_PURPOSES.length / 2) }, (_, row) => (
+              <View key={row} className="flex-row gap-3">
+                {LOAD_PURPOSES.slice(row * 2, row * 2 + 2).map((purpose) => (
+                  <ChoiceCard
+                    key={purpose}
+                    half
+                    icon={PURPOSE_META[purpose].icon}
+                    label={PURPOSE_META[purpose].label}
+                    selected={purposes.includes(purpose)}
+                    onPress={() => togglePurpose(purpose)}
+                  />
+                ))}
+                {LOAD_PURPOSES.slice(row * 2, row * 2 + 2).length === 1 ? (
+                  <View className="flex-1" />
+                ) : null}
+              </View>
+            ))}
+          </View>
+        </WizardScaffold>
+      </>
+    );
+  }
+
   return (
     <>
       <Stack.Screen options={{ title: caliber ?? '' }} />
       <WizardScaffold
         title={t.wizard.loadName}
         subtitle={t.wizard.loadNameSub}
-        step={2}
-        totalSteps={3}
+        step={3}
+        totalSteps={4}
         ctaLabel={t.wizard.save}
         ctaDisabled={name.trim().length === 0 || submitting}
         onNext={() => void handleSave()}

@@ -17,16 +17,29 @@ import {
   type VersionSummary,
 } from '@/lib/loadDevelopment';
 import {
+  LOAD_PURPOSES,
   deleteLoad,
   listVersions,
   updateLoad,
   type Load,
   type LoadStatus,
   type LoadVersion,
+  type LoadPurpose,
 } from '@/lib/loads';
 import { supabase } from '@/lib/supabase';
 import { useCachedQuery } from '@/lib/useCachedQuery';
 import { useIsOnline } from '@/lib/useIsOnline';
+
+const PURPOSE_LABELS: Record<LoadPurpose, string> = {
+  precision: t.loads.purpose_precision,
+  low_recoil: t.loads.purpose_low_recoil,
+  long_range: t.loads.purpose_long_range,
+  competition: t.loads.purpose_competition,
+  hunting: t.loads.purpose_hunting,
+  training: t.loads.purpose_training,
+  subsonic: t.loads.purpose_subsonic,
+  economy: t.loads.purpose_economy,
+};
 
 const STATUS_LABELS: Record<LoadStatus, string> = {
   development: t.loads.statusDevelopment,
@@ -186,6 +199,17 @@ export default function LoadDetail() {
         <Text className="text-text-muted">
           {[data.caliber, firearmName].filter(Boolean).join(' · ')}
         </Text>
+        {data.purpose.length > 0 ? (
+          <View className="flex-row flex-wrap gap-1.5 pt-1">
+            {data.purpose
+              .filter((p): p is LoadPurpose => (LOAD_PURPOSES as readonly string[]).includes(p))
+              .map((p) => (
+                <View key={p} className="rounded-pill bg-moss-soft px-2.5 py-1">
+                  <Text className="text-xs font-medium text-moss">{PURPOSE_LABELS[p]}</Text>
+                </View>
+              ))}
+          </View>
+        ) : null}
       </View>
 
       {summaries.length === 0 ? (
