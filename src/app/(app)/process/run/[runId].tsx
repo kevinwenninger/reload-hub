@@ -161,7 +161,7 @@ export default function RunScreen() {
               <MaterialCommunityIcons
                 name={done ? 'checkbox-marked-circle' : 'checkbox-blank-circle-outline'}
                 size={26}
-                color={done ? colors.primary : colors.textMuted}
+                color={done ? colors.moss : colors.textMuted}
               />
               <View className="flex-1 gap-0.5">
                 <Text

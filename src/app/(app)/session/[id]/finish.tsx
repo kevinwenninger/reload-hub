@@ -130,7 +130,7 @@ export default function FinishSession() {
                 <MaterialCommunityIcons
                   name={checked ? 'checkbox-marked' : 'checkbox-blank-outline'}
                   size={22}
-                  color={checked ? colors.primary : colors.textMuted}
+                  color={checked ? colors.moss : colors.textMuted}
                 />
               </Pressable>
             );
