@@ -78,7 +78,7 @@ export default function HomeScreen() {
   const readyToTest = (versions.data ?? [])
     .filter(
       (version) =>
-        version.rounds_loaded > 0 &&
+        (version.rounds_loaded ?? 0) > 0 &&
         !testedVersionIds.has(version.id) &&
         loadById.get(version.load_id)?.status !== 'retired',
     )

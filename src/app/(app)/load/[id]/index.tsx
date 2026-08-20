@@ -82,7 +82,7 @@ function VersionCard({
         ) : null}
         <View className="flex-row flex-wrap gap-x-4 gap-y-1">
           <Text className="text-xs text-text-muted">
-            {version.rounds_loaded} {t.loads.loaded}
+            {version.rounds_loaded ?? 0} {t.loads.loaded}
           </Text>
           <Text className="text-xs text-text-muted">
             {tests === 0 ? t.loads.notTested : `${tests}× ${t.loads.tested}`}
@@ -228,9 +228,9 @@ export default function LoadDetail() {
         <Text className="text-text-muted">
           {[data.caliber, firearmName].filter(Boolean).join(' · ')}
         </Text>
-        {data.purpose.length > 0 ? (
+        {(data.purpose ?? []).length > 0 ? (
           <View className="flex-row flex-wrap gap-1.5 pt-1">
-            {data.purpose
+            {(data.purpose ?? [])
               .filter((p): p is LoadPurpose => (LOAD_PURPOSES as readonly string[]).includes(p))
               .map((p) => (
                 <View key={p} className="rounded-pill bg-moss-soft px-2.5 py-1">

@@ -189,7 +189,7 @@ export default function LoadVersionDetail() {
             {t.loads.logBatch}
           </Text>
           <Text className="text-xs text-on-primary opacity-80">
-            {t.loads.roundsLoaded}: {data.rounds_loaded}
+            {t.loads.roundsLoaded}: {data.rounds_loaded ?? 0}
             {stock !== null
               ? ` · ${t.loads.stockAllows} ${stock.rounds} ${t.loads.moreRounds} (${t.loads.limitedBy} ${COST_PART_LABELS[stock.limiting].toLowerCase()})`
               : ''}
