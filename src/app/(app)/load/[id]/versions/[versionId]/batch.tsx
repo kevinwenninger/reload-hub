@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Alert, ScrollView, Text, View } from 'react-native';
 
 import { Button } from '@/components/Button';
+import { DateField } from '@/components/DateField';
 import { FormField } from '@/components/FormField';
 import { Stepper } from '@/components/Stepper';
 import { UnitField } from '@/components/UnitField';
@@ -74,13 +75,10 @@ export default function LogBatch() {
       contentContainerClassName="gap-5 p-6"
       keyboardShouldPersistTaps="handled"
     >
-      <FormField
+      <DateField
         label={t.loads.batchDate}
-        placeholder={t.inventory.purchaseDatePlaceholder}
-        autoCapitalize="none"
-        keyboardType="numbers-and-punctuation"
         value={date}
-        onChangeText={setDate}
+        onChange={(value) => setDate(value ?? new Date().toISOString().slice(0, 10))}
       />
       <View className="gap-1.5">
         <Text className="text-sm font-medium text-text-muted">{t.loads.batchQty}</Text>

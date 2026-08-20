@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 
 import { Button } from '@/components/Button';
+import { DateField } from '@/components/DateField';
 import { FormField } from '@/components/FormField';
 import type { InventoryLot, LotUnit } from '@/lib/inventory';
 import { t } from '@/lib/i18n';
@@ -26,8 +27,6 @@ interface LotFormProps {
   footer?: React.ReactNode;
 }
 
-const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
-
 export function LotForm({
   initial,
   unit,
@@ -37,7 +36,9 @@ export function LotForm({
   footer,
 }: LotFormProps) {
   const [lotNumber, setLotNumber] = useState(initial?.lot_number ?? '');
-  const [purchaseDate, setPurchaseDate] = useState(initial?.purchase_date ?? '');
+  const [purchaseDate, setPurchaseDate] = useState<string | null>(
+    initial?.purchase_date ?? null,
+  );
   const [source, setSource] = useState(initial?.source ?? '');
   const [priceText, setPriceText] = useState(
     initial?.price_total == null ? '' : String(initial.price_total),
@@ -58,14 +59,9 @@ export function LotForm({
   const valid = qtyInitial !== null && qtyInitial >= 0;
 
   function handleSubmit() {
-    const date = purchaseDate.trim();
-    if (date !== '' && !DATE_PATTERN.test(date)) {
-      Alert.alert(t.inventory.purchaseDate, t.inventory.invalidDate);
-      return;
-    }
     onSubmit({
       lot_number: lotNumber.trim() === '' ? null : lotNumber.trim(),
-      purchase_date: date === '' ? null : date,
+      purchase_date: purchaseDate,
       source: source.trim() === '' ? null : source.trim(),
       price_total: price !== null && price >= 0 ? price : null,
       qty_initial: qtyInitial!,
@@ -90,13 +86,11 @@ export function LotForm({
         value={lotNumber}
         onChangeText={setLotNumber}
       />
-      <FormField
+      <DateField
         label={t.inventory.purchaseDate}
-        placeholder={t.inventory.purchaseDatePlaceholder}
-        autoCapitalize="none"
-        keyboardType="numbers-and-punctuation"
         value={purchaseDate}
-        onChangeText={setPurchaseDate}
+        onChange={setPurchaseDate}
+        clearable
       />
       <FormField
         label={t.inventory.source}
