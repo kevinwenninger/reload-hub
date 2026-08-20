@@ -176,6 +176,8 @@ export const t = {
     ladderTest: 'Ladder test',
     chargeStart: 'Charge start',
     chargeEnd: 'Charge end',
+    ladderStepsCount: 'Number of steps',
+    ladderOverview: 'Charges in this ladder',
     chargeStep: 'Charge step',
     ladderSteps: 'steps',
     ladderResults: 'Ladder results',

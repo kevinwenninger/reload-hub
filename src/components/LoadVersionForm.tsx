@@ -4,6 +4,7 @@ import { ScrollView, Text, View } from 'react-native';
 import { Button } from '@/components/Button';
 import { ComponentSlotPicker } from '@/components/ComponentSlotPicker';
 import { FormField } from '@/components/FormField';
+import { OptionChips } from '@/components/OptionChips';
 import { LoadDataDisclaimer } from '@/components/LoadDataDisclaimer';
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { UnitField } from '@/components/UnitField';
@@ -127,12 +128,22 @@ export function LoadVersionForm({
   const [chargeText, setChargeText] = useState(
     prefill(initial?.charge_mg ?? null, (v) => mgToMass(v, prefs.mass)),
   );
-  const [chargeEndText, setChargeEndText] = useState(
-    prefill(initial?.charge_end_mg ?? null, (v) => mgToMass(v, prefs.mass)),
-  );
   const [chargeStepText, setChargeStepText] = useState(
     prefill(initial?.charge_step_mg ?? null, (v) => mgToMass(v, prefs.mass)),
   );
+  const [stepsCount, setStepsCount] = useState(() => {
+    if (
+      initial?.charge_mg != null &&
+      initial?.charge_end_mg != null &&
+      initial?.charge_step_mg != null &&
+      initial.charge_step_mg > 0
+    ) {
+      const derived =
+        Math.round((initial.charge_end_mg - initial.charge_mg) / initial.charge_step_mg) + 1;
+      if (derived >= 2 && derived <= 12) return derived;
+    }
+    return 5;
+  });
   const [coalText, setCoalText] = useState(
     prefill(initial?.coal_mm ?? null, (v) => mmToLength(v, prefs.length)),
   );
@@ -173,10 +184,22 @@ export function LoadVersionForm({
     return [lengthToMm(parsed, prefs.length), makeInput(text.trim(), prefs.length)];
   }
 
+  // Ladder: end charge is derived from start + (steps − 1) × step.
+  const ladderStart = parseDecimal(chargeText);
+  const ladderStep = parseDecimal(chargeStepText);
+  const ladderCharges =
+    kind === 'ladder' && ladderStart !== null && ladderStart > 0 && ladderStep !== null && ladderStep > 0
+      ? Array.from({ length: stepsCount }, (_, i) =>
+          Math.round((ladderStart + i * ladderStep) * 1000) / 1000,
+        )
+      : [];
+
   function handleSubmit() {
     const [charge_mg, charge_input] = massField(chargeText);
-    const [charge_end_mg, charge_end_input] = massField(chargeEndText);
     const [charge_step_mg, charge_step_input] = massField(chargeStepText);
+    const ladderEnd = ladderCharges.length > 0 ? ladderCharges[ladderCharges.length - 1] : null;
+    const charge_end_mg = ladderEnd === null ? null : massToMg(ladderEnd, prefs.mass);
+    const charge_end_input = ladderEnd === null ? null : makeInput(String(ladderEnd), prefs.mass);
     const [coal_mm, coal_input] = lengthField(coalText);
     const [cbto_mm, cbto_input] = lengthField(cbtoText);
     const [neck_bushing_mm, neck_bushing_input] = lengthField(neckBushingText);
@@ -261,11 +284,14 @@ export function LoadVersionForm({
       />
       {kind === 'ladder' ? (
         <>
-          <UnitField
-            label={t.loads.chargeEnd}
-            unit={prefs.mass}
-            value={chargeEndText}
-            onChangeText={setChargeEndText}
+          <OptionChips
+            label={t.loads.chargeStep}
+            options={(prefs.mass === 'gr'
+              ? ['0.1', '0.2', '0.3', '0.5']
+              : ['0.005', '0.01', '0.02', '0.03']
+            ).map((value) => ({ value, label: makeInput(value, prefs.mass) }))}
+            value={chargeStepText === '' ? null : chargeStepText}
+            onChange={setChargeStepText}
           />
           <UnitField
             label={t.loads.chargeStep}
@@ -273,6 +299,31 @@ export function LoadVersionForm({
             value={chargeStepText}
             onChangeText={setChargeStepText}
           />
+          <OptionChips
+            label={t.loads.ladderStepsCount}
+            options={[3, 4, 5, 6, 7, 8, 9, 10].map((value) => ({
+              value: String(value),
+              label: String(value),
+            }))}
+            value={String(stepsCount)}
+            onChange={(value) => setStepsCount(Number(value))}
+          />
+          {ladderCharges.length > 0 ? (
+            <View className="gap-1.5 rounded-card border border-border bg-surface p-4">
+              <Text className="text-sm font-medium text-text-muted">
+                {t.loads.ladderOverview}
+              </Text>
+              <View className="flex-row flex-wrap gap-1.5">
+                {ladderCharges.map((value) => (
+                  <View key={value} className="rounded-pill bg-moss-soft px-2.5 py-1">
+                    <Text className="text-xs font-medium text-moss">
+                      {makeInput(String(value), prefs.mass)}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+          ) : null}
         </>
       ) : null}
       <UnitField
@@ -321,16 +372,7 @@ export function LoadVersionForm({
         label={submitLabel}
         onPress={handleSubmit}
         loading={submitting}
-        disabled={
-          kind === 'ladder' &&
-          !(
-            parseDecimal(chargeText) !== null &&
-            parseDecimal(chargeEndText) !== null &&
-            parseDecimal(chargeStepText) !== null &&
-            parseDecimal(chargeEndText)! >= parseDecimal(chargeText)! &&
-            parseDecimal(chargeStepText)! > 0
-          )
-        }
+        disabled={kind === 'ladder' && ladderCharges.length === 0}
       />
       {footer}
     </ScrollView>
