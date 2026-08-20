@@ -5,6 +5,26 @@ export type Load = Tables<'loads'>;
 export type LoadVersion = Tables<'load_versions'>;
 export type LoadStatus = 'development' | 'proven' | 'retired';
 export type CrimpType = 'none' | 'roll' | 'taper';
+export type VersionKind = 'single' | 'ladder';
+
+/**
+ * Derived ladder steps in canonical mg — pure arithmetic on the owner's
+ * explicit start/end/step; never a suggestion. Capped defensively.
+ */
+export function ladderSteps(version: {
+  charge_mg: number | null;
+  charge_end_mg: number | null;
+  charge_step_mg: number | null;
+}): number[] {
+  const { charge_mg: start, charge_end_mg: end, charge_step_mg: step } = version;
+  if (start === null || end === null || step === null) return [];
+  if (step <= 0 || end < start) return [];
+  const steps: number[] = [];
+  for (let value = start; value <= end + step / 100 && steps.length < 40; value += step) {
+    steps.push(Math.round(value * 1000) / 1000);
+  }
+  return steps;
+}
 
 export const LOAD_PURPOSES = [
   'precision',

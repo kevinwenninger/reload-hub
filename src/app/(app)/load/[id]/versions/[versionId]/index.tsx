@@ -22,6 +22,7 @@ import { UNIT_LABELS, UNIT_PRESETS, mpsToVelocity, type UnitPrefs } from '@/lib/
 import {
   listSessionsForVersion,
   totalMalfunctions,
+  velocitiesByCharge,
   velocitiesBySession,
 } from '@/lib/range';
 import { supabase } from '@/lib/supabase';
@@ -62,6 +63,13 @@ export default function LoadVersionDetail() {
     listSessionsForVersion(versionId),
   );
   const sessionIds = (sessions.data ?? []).map((s) => s.id);
+  const isLadder = version.data?.kind === 'ladder';
+  const chargeStats = useCachedQuery(
+    !isLadder || sessionIds.length === 0
+      ? null
+      : `ladderCharges:${versionId}:${sessionIds.length}`,
+    () => velocitiesByCharge(sessionIds),
+  );
   const velocities = useCachedQuery(
     sessionIds.length === 0 ? null : `versionVelocities:${versionId}:${sessionIds.length}`,
     () => velocitiesBySession(sessionIds),
@@ -158,8 +166,17 @@ export default function LoadVersionDetail() {
             {isFavorite ? (
               <MaterialCommunityIcons name="star" size={22} color={colors.primary} />
             ) : null}
-            <Text className="text-2xl font-bold text-text">v{data.version_no}</Text>
+            <Text className="text-2xl font-bold text-text">
+              v{data.version_no}
+              {isLadder ? ` · ${t.loads.ladder}` : ''}
+            </Text>
           </View>
+          {isLadder && data.charge_input && data.charge_end_input ? (
+            <Text className="text-sm text-text-muted">
+              {data.charge_input} – {data.charge_end_input}
+              {data.charge_step_input ? ` · ${data.charge_step_input} ${t.loads.ladderSteps}` : ''}
+            </Text>
+          ) : null}
           {data.changelog ? (
             <Text className="text-sm text-text-muted">{data.changelog}</Text>
           ) : null}
@@ -222,6 +239,7 @@ export default function LoadVersionDetail() {
         ))}
       </View>
 
+      {isLadder ? null : (
       <Pressable
         accessibilityRole="button"
         onPress={() => setCostOpen(!costOpen)}
@@ -259,6 +277,67 @@ export default function LoadVersionDetail() {
           </View>
         ) : null}
       </Pressable>
+      )}
+
+      {isLadder ? (
+        <View className="gap-3">
+          <SectionTitle>{t.loads.ladderResults}</SectionTitle>
+          {chargeStats.data === null || (chargeStats.data ?? []).length === 0 ? (
+            <Text className="text-sm text-text-muted">{t.loads.ladderNoData}</Text>
+          ) : (
+            <View className="overflow-hidden rounded-card border border-border bg-surface">
+              <View className="flex-row border-b border-border bg-surface-raised px-4 py-2">
+                <Text className="flex-[1.2] text-xs font-semibold uppercase text-text-muted">
+                  {t.loads.charge}
+                </Text>
+                <Text className="w-8 text-right text-xs font-semibold uppercase text-text-muted">
+                  n
+                </Text>
+                <Text className="flex-1 text-right text-xs font-semibold uppercase text-text-muted">
+                  {t.range.velocity_avg}
+                </Text>
+                <Text className="flex-1 text-right text-xs font-semibold uppercase text-text-muted">
+                  {t.range.velocity_sd}
+                </Text>
+                <Text className="flex-1 text-right text-xs font-semibold uppercase text-text-muted">
+                  {t.range.velocity_es}
+                </Text>
+                <View className="w-8" />
+              </View>
+              {(chargeStats.data ?? []).map((entry) => {
+                const stats = stringStats(entry.velocities);
+                const show = (mps: number | null, decimals = 0) =>
+                  mps === null ? '—' : mpsToVelocity(mps, prefs.velocity).toFixed(decimals);
+                return (
+                  <View key={entry.charge_mg} className="flex-row items-center border-b border-border px-4 py-2.5">
+                    <Text className="flex-[1.2] text-sm font-medium text-text">
+                      {entry.charge_input ?? entry.charge_mg}
+                    </Text>
+                    <Text className="w-8 text-right text-sm text-text-muted">{stats.n}</Text>
+                    <Text className="flex-1 text-right text-sm text-text">{show(stats.avg)}</Text>
+                    <Text className="flex-1 text-right text-sm text-text">{show(stats.sd, 1)}</Text>
+                    <Text className="flex-1 text-right text-sm text-text">{show(stats.es)}</Text>
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel={t.loads.ladderUseCharge}
+                      hitSlop={8}
+                      onPress={() =>
+                        router.push({
+                          pathname: '/(app)/load/[id]/versions/new',
+                          params: { id, fromVersion: versionId, charge: String(entry.charge_mg) },
+                        })
+                      }
+                      className="w-8 items-end"
+                    >
+                      <MaterialCommunityIcons name="plus-circle" size={20} color={colors.moss} />
+                    </Pressable>
+                  </View>
+                );
+              })}
+            </View>
+          )}
+        </View>
+      ) : null}
 
       <View className="gap-3">
         <SectionTitle>{t.loads.batches}</SectionTitle>
@@ -370,6 +449,7 @@ export default function LoadVersionDetail() {
           onPress={() => router.push(`/(app)/load/${id}/versions/new`)}
           variant="secondary"
         />
+        {isLadder ? null : (
         <Pressable
           accessibilityRole="button"
           onPress={() => void toggleFavorite()}
@@ -386,6 +466,7 @@ export default function LoadVersionDetail() {
             {isFavorite ? t.loads.unmarkFavorite : t.loads.markFavorite}
           </Text>
         </Pressable>
+        )}
       </View>
     </ScrollView>
   );

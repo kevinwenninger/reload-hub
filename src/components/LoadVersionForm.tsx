@@ -17,7 +17,7 @@ import {
 } from '@/lib/componentCatalog';
 import { t } from '@/lib/i18n';
 import type { InventoryLot } from '@/lib/inventory';
-import type { CrimpType, LoadVersion } from '@/lib/loads';
+import type { CrimpType, LoadVersion, VersionKind } from '@/lib/loads';
 import {
   UNIT_PRESETS,
   lengthToMm,
@@ -38,8 +38,13 @@ export interface LoadVersionFormValues {
   primer_lot_id: string | null;
   case_component_id: string | null;
   case_lot_id: string | null;
+  kind: VersionKind;
   charge_mg: number | null;
   charge_input: string | null;
+  charge_end_mg: number | null;
+  charge_end_input: string | null;
+  charge_step_mg: number | null;
+  charge_step_input: string | null;
   coal_mm: number | null;
   coal_input: string | null;
   cbto_mm: number | null;
@@ -60,6 +65,8 @@ interface LoadVersionFormProps {
   loadCaliber?: string;
   /** true = editing `initial` itself; false = new version copied from it. */
   isEdit?: boolean;
+  /** single (default) or ladder (charge range instead of one charge). */
+  kind?: VersionKind;
   components: CatalogComponent[];
   lots: InventoryLot[];
   submitLabel: string;
@@ -91,6 +98,7 @@ export function LoadVersionForm({
   initial,
   loadCaliber,
   isEdit = false,
+  kind = 'single',
   components,
   lots,
   submitLabel,
@@ -118,6 +126,12 @@ export function LoadVersionForm({
   });
   const [chargeText, setChargeText] = useState(
     prefill(initial?.charge_mg ?? null, (v) => mgToMass(v, prefs.mass)),
+  );
+  const [chargeEndText, setChargeEndText] = useState(
+    prefill(initial?.charge_end_mg ?? null, (v) => mgToMass(v, prefs.mass)),
+  );
+  const [chargeStepText, setChargeStepText] = useState(
+    prefill(initial?.charge_step_mg ?? null, (v) => mgToMass(v, prefs.mass)),
   );
   const [coalText, setCoalText] = useState(
     prefill(initial?.coal_mm ?? null, (v) => mmToLength(v, prefs.length)),
@@ -161,6 +175,8 @@ export function LoadVersionForm({
 
   function handleSubmit() {
     const [charge_mg, charge_input] = massField(chargeText);
+    const [charge_end_mg, charge_end_input] = massField(chargeEndText);
+    const [charge_step_mg, charge_step_input] = massField(chargeStepText);
     const [coal_mm, coal_input] = lengthField(coalText);
     const [cbto_mm, cbto_input] = lengthField(cbtoText);
     const [neck_bushing_mm, neck_bushing_input] = lengthField(neckBushingText);
@@ -169,6 +185,11 @@ export function LoadVersionForm({
       true,
     );
     onSubmit({
+      kind,
+      charge_end_mg: kind === 'ladder' ? charge_end_mg : null,
+      charge_end_input: kind === 'ladder' ? charge_end_input : null,
+      charge_step_mg: kind === 'ladder' ? charge_step_mg : null,
+      charge_step_input: kind === 'ladder' ? charge_step_input : null,
       bullet_component_id: componentIds.bullet,
       bullet_lot_id: lotIds.bullet,
       powder_component_id: componentIds.powder,
@@ -233,11 +254,27 @@ export function LoadVersionForm({
       </View>
 
       <UnitField
-        label={t.loads.charge}
+        label={kind === 'ladder' ? t.loads.chargeStart : t.loads.charge}
         unit={prefs.mass}
         value={chargeText}
         onChangeText={setChargeText}
       />
+      {kind === 'ladder' ? (
+        <>
+          <UnitField
+            label={t.loads.chargeEnd}
+            unit={prefs.mass}
+            value={chargeEndText}
+            onChangeText={setChargeEndText}
+          />
+          <UnitField
+            label={t.loads.chargeStep}
+            unit={prefs.mass}
+            value={chargeStepText}
+            onChangeText={setChargeStepText}
+          />
+        </>
+      ) : null}
       <UnitField
         label={t.loads.coal}
         unit={prefs.length}
@@ -280,7 +317,21 @@ export function LoadVersionForm({
         multiline
         numberOfLines={3}
       />
-      <Button label={submitLabel} onPress={handleSubmit} loading={submitting} />
+      <Button
+        label={submitLabel}
+        onPress={handleSubmit}
+        loading={submitting}
+        disabled={
+          kind === 'ladder' &&
+          !(
+            parseDecimal(chargeText) !== null &&
+            parseDecimal(chargeEndText) !== null &&
+            parseDecimal(chargeStepText) !== null &&
+            parseDecimal(chargeEndText)! >= parseDecimal(chargeText)! &&
+            parseDecimal(chargeStepText)! > 0
+          )
+        }
+      />
       {footer}
     </ScrollView>
   );

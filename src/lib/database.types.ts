@@ -236,14 +236,19 @@ export type Database = {
           cbto_input: string | null
           cbto_mm: number | null
           changelog: string | null
+          charge_end_input: string | null
+          charge_end_mg: number | null
           charge_input: string | null
           charge_mg: number | null
+          charge_step_input: string | null
+          charge_step_mg: number | null
           coal_input: string | null
           coal_mm: number | null
           created_at: string
           crimp: string
           finalized_at: string | null
           id: string
+          kind: string
           load_id: string
           neck_bushing_input: string | null
           neck_bushing_mm: number | null
@@ -267,14 +272,19 @@ export type Database = {
           cbto_input?: string | null
           cbto_mm?: number | null
           changelog?: string | null
+          charge_end_input?: string | null
+          charge_end_mg?: number | null
           charge_input?: string | null
           charge_mg?: number | null
+          charge_step_input?: string | null
+          charge_step_mg?: number | null
           coal_input?: string | null
           coal_mm?: number | null
           created_at?: string
           crimp?: string
           finalized_at?: string | null
           id?: string
+          kind?: string
           load_id: string
           neck_bushing_input?: string | null
           neck_bushing_mm?: number | null
@@ -298,14 +308,19 @@ export type Database = {
           cbto_input?: string | null
           cbto_mm?: number | null
           changelog?: string | null
+          charge_end_input?: string | null
+          charge_end_mg?: number | null
           charge_input?: string | null
           charge_mg?: number | null
+          charge_step_input?: string | null
+          charge_step_mg?: number | null
           coal_input?: string | null
           coal_mm?: number | null
           created_at?: string
           crimp?: string
           finalized_at?: string | null
           id?: string
+          kind?: string
           load_id?: string
           neck_bushing_input?: string | null
           neck_bushing_mm?: number | null
@@ -666,6 +681,8 @@ export type Database = {
       }
       shot_strings: {
         Row: {
+          charge_input: string | null
+          charge_mg: number | null
           created_at: string
           id: string
           label: string | null
@@ -675,6 +692,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          charge_input?: string | null
+          charge_mg?: number | null
           created_at?: string
           id?: string
           label?: string | null
@@ -684,6 +703,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          charge_input?: string | null
+          charge_mg?: number | null
           created_at?: string
           id?: string
           label?: string | null

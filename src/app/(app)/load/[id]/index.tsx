@@ -72,7 +72,11 @@ function VersionCard({
           ) : null}
           <Text className="flex-1 text-base font-semibold text-text">
             v{version.version_no}
-            {version.charge_input ? ` — ${version.charge_input}` : ''}
+            {version.kind === 'ladder'
+              ? ` — ${t.loads.ladder} ${version.charge_input ?? ''}–${version.charge_end_input ?? ''}`
+              : version.charge_input
+                ? ` — ${version.charge_input}`
+                : ''}
           </Text>
           <MaterialCommunityIcons name="chevron-right" size={20} color={colors.textMuted} />
         </View>
@@ -233,8 +237,18 @@ export default function LoadDetail() {
         <View className="gap-3 rounded-card border border-border bg-surface p-4">
           <Text className="text-sm text-text">{t.loads.firstVersionHint}</Text>
           <Button
+            label={t.loads.ladderTest}
+            onPress={() =>
+              router.push({
+                pathname: '/(app)/load/[id]/versions/new',
+                params: { id, kind: 'ladder' },
+              })
+            }
+          />
+          <Button
             label={t.loads.newVersion}
             onPress={() => router.push(`/(app)/load/${id}/versions/new`)}
+            variant="secondary"
           />
         </View>
       ) : (
@@ -261,6 +275,16 @@ export default function LoadDetail() {
           <Button
             label={t.loads.nextVersion}
             onPress={() => router.push(`/(app)/load/${id}/versions/new`)}
+          />
+          <Button
+            label={t.loads.ladderTest}
+            onPress={() =>
+              router.push({
+                pathname: '/(app)/load/[id]/versions/new',
+                params: { id, kind: 'ladder' },
+              })
+            }
+            variant="secondary"
           />
           {summaries.length >= 2 ? (
             <Button

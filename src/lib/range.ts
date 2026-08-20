@@ -154,6 +154,46 @@ export async function velocitiesBySession(
   return bySession;
 }
 
+/** Velocities pooled per ladder charge across sessions (string.charge_mg). */
+export interface ChargeVelocities {
+  charge_mg: number;
+  charge_input: string | null;
+  velocities: number[];
+}
+
+export async function velocitiesByCharge(
+  sessionIds: string[],
+): Promise<ChargeVelocities[]> {
+  if (sessionIds.length === 0) return [];
+  const { data: strings, error } = await supabase
+    .from('shot_strings')
+    .select('id, charge_mg, charge_input')
+    .in('session_id', sessionIds)
+    .not('charge_mg', 'is', null);
+  if (error) throw error;
+  if (strings.length === 0) return [];
+  const { data: shots, error: shotsError } = await supabase
+    .from('shots')
+    .select('string_id, velocity_mps')
+    .in('string_id', strings.map((s) => s.id));
+  if (shotsError) throw shotsError;
+  const byCharge = new Map<number, ChargeVelocities>();
+  for (const string of strings) {
+    const entry = byCharge.get(string.charge_mg!) ?? {
+      charge_mg: string.charge_mg!,
+      charge_input: string.charge_input,
+      velocities: [],
+    };
+    entry.velocities.push(
+      ...shots
+        .filter((shot) => shot.string_id === string.id)
+        .map((shot) => shot.velocity_mps),
+    );
+    byCharge.set(string.charge_mg!, entry);
+  }
+  return [...byCharge.values()].sort((a, b) => a.charge_mg - b.charge_mg);
+}
+
 /** Sessions that tested a given load version (server; used for range results). */
 export async function listSessionsForVersion(
   loadVersionId: string,

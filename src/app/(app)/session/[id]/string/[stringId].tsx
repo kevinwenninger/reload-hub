@@ -12,24 +12,30 @@ import {
 } from 'react-native';
 
 import { FormField } from '@/components/FormField';
+import { OptionChips } from '@/components/OptionChips';
 import { useAuth } from '@/lib/auth';
 import { colors } from '@/lib/colors';
 import { showErrorAlert } from '@/lib/errors';
 import { t } from '@/lib/i18n';
 import { newId } from '@/lib/ids';
+import { listAllVersions, ladderSteps } from '@/lib/loads';
 import {
   deleteShot,
+  getSessionLocal,
   listShotsLocal,
   listStringsLocal,
   saveShot,
   saveString,
+  type RangeSession,
   type Shot,
 } from '@/lib/range';
+import { useCachedQuery } from '@/lib/useCachedQuery';
 import { isOutlier, stringStats } from '@/lib/stats';
 import {
   UNIT_LABELS,
   UNIT_PRESETS,
   makeInput,
+  mgToMass,
   mpsToVelocity,
   parseDecimal,
   velocityToMps,
@@ -50,20 +56,38 @@ export default function ShotStringEntry() {
   const [shots, setShots] = useState<Shot[]>([]);
   const [input, setInput] = useState('');
   const [outlierHint, setOutlierHint] = useState(false);
+  const [rangeSession, setRangeSession] = useState<RangeSession | null>(null);
+  const [chargeMg, setChargeMg] = useState<number | null>(null);
+  const versions = useCachedQuery('allVersions', listAllVersions);
 
   useEffect(() => {
     void (async () => {
       const existing = await listStringsLocal(sessionId);
       const current = existing.find((entry) => entry.id === stringId);
+      setRangeSession(await getSessionLocal(sessionId).catch(() => null));
       if (current !== undefined) {
         setLabel(current.label ?? '');
         setStringSaved(true);
+        setChargeMg(current.charge_mg ?? null);
         setShots(await listShotsLocal(stringId));
       } else {
         setLabel(`String ${existing.length + 1}`);
       }
     })();
   }, [sessionId, stringId]);
+
+  // Ladder session: each string belongs to one charge step.
+  const testedVersion = versions.data?.find(
+    (entry) => entry.id === rangeSession?.load_version_id,
+  );
+  const steps = testedVersion?.kind === 'ladder' ? ladderSteps(testedVersion) : [];
+  const formatStep = (mg: number) =>
+    Number(mgToMass(mg, prefs.mass).toFixed(2)).toString();
+
+  function pickStep(mg: number) {
+    setChargeMg(mg);
+    if (!stringSaved) setLabel(makeInput(formatStep(mg), prefs.mass));
+  }
 
   const velocities = shots.map((shot) => shot.velocity_mps);
   const stats = stringStats(velocities);
@@ -79,6 +103,8 @@ export default function ShotStringEntry() {
       session_id: sessionId,
       label: label.trim() === '' ? null : label.trim(),
       notes: null,
+      charge_mg: chargeMg,
+      charge_input: chargeMg === null ? null : makeInput(formatStep(chargeMg), prefs.mass),
       created_at: now,
       updated_at: now,
     });
@@ -150,6 +176,9 @@ export default function ShotStringEntry() {
       await saveString({
         ...current,
         label: label.trim() === '' ? null : label.trim(),
+        charge_mg: chargeMg,
+        charge_input:
+          chargeMg === null ? null : makeInput(formatStep(chargeMg), prefs.mass),
         updated_at: new Date().toISOString(),
       });
     }
@@ -167,6 +196,18 @@ export default function ShotStringEntry() {
           onChangeText={setLabel}
           onEndEditing={() => void saveLabel()}
         />
+
+        {steps.length > 0 ? (
+          <OptionChips
+            label={t.loads.ladderStepPick}
+            options={steps.map((mg) => ({
+              value: String(mg),
+              label: formatStep(mg),
+            }))}
+            value={chargeMg === null ? null : String(chargeMg)}
+            onChange={(value) => pickStep(Number(value))}
+          />
+        ) : null}
 
         {/* Live stats above the list (docs/RANGE_FLOWS.md R3). */}
         <View className="flex-row justify-between rounded-card border border-border bg-surface p-4">

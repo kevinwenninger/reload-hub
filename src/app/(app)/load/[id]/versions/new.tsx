@@ -18,7 +18,13 @@ import { supabase } from '@/lib/supabase';
 import { useCachedQuery } from '@/lib/useCachedQuery';
 
 export default function NewLoadVersion() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, kind: kindParam, fromVersion, charge } = useLocalSearchParams<{
+    id: string;
+    kind?: string;
+    fromVersion?: string;
+    charge?: string;
+  }>();
+  const kind = kindParam === 'ladder' ? ('ladder' as const) : ('single' as const);
   const { session } = useAuth();
   const [submitting, setSubmitting] = useState(false);
 
@@ -41,8 +47,25 @@ export default function NewLoadVersion() {
   }
 
   const versionList = versions.data ?? [];
-  // Prefill from the latest version — the common case is "same recipe, one change".
-  const latest = versionList[0];
+  // Prefill from the latest version — the common case is "same recipe, one
+  // change". Promoting a ladder charge prefills from the ladder with that
+  // charge as the single charge.
+  const source =
+    (fromVersion ? versionList.find((v) => v.id === fromVersion) : undefined) ??
+    versionList[0];
+  const promotedCharge = charge ? Number(charge) : null;
+  const latest =
+    source === undefined
+      ? undefined
+      : promotedCharge !== null && Number.isFinite(promotedCharge)
+        ? {
+            ...source,
+            kind: 'single',
+            charge_mg: promotedCharge,
+            charge_end_mg: null,
+            charge_step_mg: null,
+          }
+        : source;
   const nextNo =
     versionList.length === 0
       ? 1
@@ -71,6 +94,7 @@ export default function NewLoadVersion() {
     <LoadVersionForm
       initial={latest}
       loadCaliber={load.data?.caliber}
+      kind={kind}
       components={components.data ?? []}
       lots={lots.data ?? []}
       submitLabel={`${t.common.save} v${nextNo}`}
